@@ -1,0 +1,49 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: f1_manager_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: f1_manager
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3306:3306"
+    volumes:
+      # Volumen para persistencia de datos
+      - f1_db_data:/var/lib/mysql
+      # Script SQL inicial
+      - ./f1manager.sql:/docker-entrypoint-initdb.d/f1manager.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+    networks:
+      - f1_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: f1_manager_backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/f1_manager?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - f1_network
+
+volumes:
+  f1_db_data:
+
+networks:
+  f1_network:
+    driver: bridge

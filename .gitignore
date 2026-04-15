@@ -1,0 +1,84 @@
+# Build output
+/target/
+
+# Maven wrapper
+/.mvn/wrapper/maven-wrapper.jar
+!/.mvn/wrapper/maven-wrapper.properties
+
+# IntelliJ IDEA
+/.idea/
+*.iws
+*.iml
+*.ipr
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+.factorypath
+
+# NetBeans
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+.netbeans_*/
+
+# STS
+.springBeans
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon\r
+
+# Java artifacts
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+*.jks
+*.keystore
+
+# Generated source directories
+**/generated-sources/
+**/generated-test-sources/
+
+# Spring Boot DevTools
+spring-boot-devtools-*.jar
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Maven logs
+.mvn/logs/
+
+# Test reports
+/surefire-reports/
+/failsafe-reports/
+
+# Docker override (optional)
+docker-compose.override.yml
+
+# JVM crash logs
+hs_err_pid*
+replay_pid*
