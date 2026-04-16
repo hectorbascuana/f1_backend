@@ -15,30 +15,35 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Piloto_Circuito")
+@Table(name = "piloto_circuito")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PilotoCircuito {
-    
+
     @EmbeddedId
     private PilotoCircuitoId id;
-    
+
     @Column(name = "posicion")
     private Integer posicion;
-    
+
     @Column(name = "tiempo_total")
     private LocalTime tiempoTotal;
-    
+
     @Column(name = "vuelta_rapida")
     private LocalTime vueltaRapida;
-    
+
+    @ManyToOne
+    @MapsId("partidaId")
+    @JoinColumn(name = "partida_id")
+    private Partida partida;
+
     @ManyToOne
     @MapsId("circuitoId")
     @JoinColumn(name = "circuito_id")
     @JsonIgnoreProperties("pilotoCircuitos")
     private Circuito circuito;
-    
+
     @ManyToOne
     @MapsId("pilotoId")
     @JoinColumn(name = "piloto_id")

@@ -20,43 +20,47 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Piloto")
+@Table(name = "piloto")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Piloto {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+
+    @ManyToOne
+    @JoinColumn(name = "partida_id", nullable = false)
+    private Partida partida;
+
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
-    
+
     @Column(name = "pais", length = 50)
     private String pais;
-    
+
     @Column(name = "imagen", length = 255)
     private String imagen;
-    
+
     @Column(name = "edad")
     private Integer edad;
-    
+
     @Column(name = "puntos")
     private Integer puntos;
-    
+
     @Column(name = "valor", precision = 15, scale = 2)
     private BigDecimal valor;
-    
+
     @ManyToOne
     @JoinColumn(name = "escuderia_id", referencedColumnName = "id")
     @JsonIgnoreProperties("pilotos")
     private Escuderia escuderia;
-    
+
     @OneToOne
     @JoinColumn(name = "estadistica_id", referencedColumnName = "id")
     private Estadistica estadistica;
-    
+
     @OneToMany(mappedBy = "piloto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PilotoCircuito> pilotoCircuitos;
 }

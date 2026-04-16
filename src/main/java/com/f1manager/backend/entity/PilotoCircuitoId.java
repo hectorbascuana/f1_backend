@@ -13,25 +13,29 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PilotoCircuitoId implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
-    
+
+    private Integer partidaId;
     private Integer circuitoId;
     private Integer pilotoId;
     private Integer temporada;
-    
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         PilotoCircuitoId that = (PilotoCircuitoId) o;
-        return Objects.equals(circuitoId, that.circuitoId) &&
-               Objects.equals(pilotoId, that.pilotoId) &&
-               Objects.equals(temporada, that.temporada);
+        return Objects.equals(partidaId, that.partidaId) &&
+                Objects.equals(circuitoId, that.circuitoId) &&
+                Objects.equals(pilotoId, that.pilotoId) &&
+                Objects.equals(temporada, that.temporada);
     }
-    
+
     @Override
     public int hashCode() {
-        return Objects.hash(circuitoId, pilotoId, temporada);
+        return Objects.hash(partidaId, circuitoId, pilotoId, temporada);
     }
 }

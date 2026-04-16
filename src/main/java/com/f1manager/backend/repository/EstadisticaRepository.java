@@ -5,6 +5,9 @@ import org.springframework.stereotype.Repository;
 
 import com.f1manager.backend.entity.Estadistica;
 
+import java.util.List;
+
 @Repository
 public interface EstadisticaRepository extends JpaRepository<Estadistica, Integer> {
+    List<Estadistica> findByPartidaId(Integer partidaId);
 }

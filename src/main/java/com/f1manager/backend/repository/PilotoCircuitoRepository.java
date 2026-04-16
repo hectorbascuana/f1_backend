@@ -6,6 +6,9 @@ import org.springframework.stereotype.Repository;
 import com.f1manager.backend.entity.PilotoCircuito;
 import com.f1manager.backend.entity.PilotoCircuitoId;
 
+import java.util.List;
+
 @Repository
 public interface PilotoCircuitoRepository extends JpaRepository<PilotoCircuito, PilotoCircuitoId> {
+    List<PilotoCircuito> findByIdPartidaId(Integer partidaId);
 }

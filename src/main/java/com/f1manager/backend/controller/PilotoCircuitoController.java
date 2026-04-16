@@ -30,11 +30,12 @@ public class PilotoCircuitoController {
                 .body(pilotoCircuitoService.guardar(pilotoCircuito));
     }
     
-    @DeleteMapping("/{circuitoId}/{pilotoId}/{temporada}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer circuitoId,
+    @DeleteMapping("/{partidaId}/{circuitoId}/{pilotoId}/{temporada}")
+    public ResponseEntity<Void> eliminar(@PathVariable Integer partidaId,
+                                         @PathVariable Integer circuitoId,
                                          @PathVariable Integer pilotoId,
                                          @PathVariable Integer temporada) {
-        PilotoCircuitoId id = new PilotoCircuitoId(circuitoId, pilotoId, temporada);
+        PilotoCircuitoId id = new PilotoCircuitoId(partidaId, circuitoId, pilotoId, temporada);
         if (pilotoCircuitoService.obtenerPorId(id).isPresent()) {
             pilotoCircuitoService.eliminar(id);
             return ResponseEntity.noContent().build();
