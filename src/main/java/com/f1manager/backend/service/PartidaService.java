@@ -40,7 +40,12 @@ public class PartidaService {
     private CircuitoRepository circuitoRepository;
 
     @Transactional
-    public Partida crearNuevaPartida(String nombre) throws Exception {
+    public Partida crearNuevaPartida(String nombre, Integer idEscuderiaJson) throws Exception {
+        // Enforce limit of 3 games
+        if (partidaRepository.count() >= 3) {
+            throw new RuntimeException("No se pueden crear más de 3 partidas.");
+        }
+
         // Create new Partida
         Partida partida = new Partida();
         partida.setNombre(nombre);
@@ -72,9 +77,11 @@ public class PartidaService {
 
         // Parse Escuderias
         Map<Integer, Escuderia> mapEscuderias = new HashMap<>();
+        Escuderia escuderiaSeleccionada = null;
         JsonNode escNode = root.get("escuderias");
         if (escNode != null && escNode.isArray()) {
             for (JsonNode node : escNode) {
+                int jsonId = node.path("id").asInt();
                 Escuderia esc = new Escuderia();
                 esc.setPartida(partidaGuardada);
                 esc.setNombre(node.path("nombre").asText());
@@ -87,8 +94,21 @@ public class PartidaService {
                 esc.setBancoPruebas(node.path("banco_pruebas").asInt());
                 esc.setEscuelaPilotos(node.path("escuela_pilotos").asInt());
                 esc = escuderiaRepository.save(esc);
-                mapEscuderias.put(node.path("id").asInt(), esc);
+                mapEscuderias.put(jsonId, esc);
+
+                // If this is the chosen team (by JSON ID), store it
+                if (jsonId == idEscuderiaJson) {
+                    escuderiaSeleccionada = esc;
+                }
             }
+        }
+
+        // If team found, assign it to Partida
+        if (escuderiaSeleccionada != null) {
+            partidaGuardada.setEscuderiaSeleccionada(escuderiaSeleccionada);
+            partidaRepository.save(partidaGuardada);
+        } else {
+            throw new RuntimeException("La escudería con ID '" + idEscuderiaJson + "' no existe en los datos iniciales.");
         }
 
         // Parse Pilotos

@@ -18,13 +18,13 @@ public class PartidaController {
     private PartidaService partidaService;
 
     @PostMapping("/nueva")
-    public ResponseEntity<?> crearNuevaPartida(@RequestParam(defaultValue = "Partida Nueva") String nombre) {
+    public ResponseEntity<?> crearNuevaPartida(@RequestBody com.f1manager.backend.dto.NuevaPartidaDTO request) {
         try {
-            Partida p = partidaService.crearNuevaPartida(nombre);
+            Partida p = partidaService.crearNuevaPartida(request.getNombre(), request.getIdEscuderiaJson());
             Map<String, Object> response = new HashMap<>();
             response.put("status", "ok");
             response.put("partidaId", p.getId());
-            response.put("mensaje", "Partida generada existosamente");
+            response.put("mensaje", "Partida generada existosamente con la escudería ID " + request.getIdEscuderiaJson());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();

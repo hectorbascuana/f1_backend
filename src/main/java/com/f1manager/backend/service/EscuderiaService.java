@@ -26,6 +26,12 @@ public class EscuderiaService {
                 .map(this::toEscuderiaDTO)
                 .collect(Collectors.toList());
     }
+
+    public List<EscuderiaDTO> obtenerPorPartida(Integer partidaId) {
+        return escuderiaRepository.findByPartidaId(partidaId).stream()
+                .map(this::toEscuderiaDTO)
+                .collect(Collectors.toList());
+    }
     
     public Optional<EscuderiaDTO> obtenerPorId(Integer id) {
         return escuderiaRepository.findById(id)

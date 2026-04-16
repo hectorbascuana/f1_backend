@@ -20,6 +20,10 @@ public class EstadisticaService {
     public List<Estadistica> obtenerTodas() {
         return estadisticaRepository.findAll();
     }
+
+    public List<Estadistica> obtenerPorPartida(Integer partidaId) {
+        return estadisticaRepository.findByPartidaId(partidaId);
+    }
     
     public Optional<Estadistica> obtenerPorId(Integer id) {
         return estadisticaRepository.findById(id);

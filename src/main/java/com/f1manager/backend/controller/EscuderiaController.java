@@ -21,7 +21,7 @@ import com.f1manager.backend.entity.Escuderia;
 import com.f1manager.backend.service.EscuderiaService;
 
 @RestController
-@RequestMapping("/api/escuderias")
+@RequestMapping("/api/partida/{partidaId}/escuderias")
 @CrossOrigin(origins = "*")
 public class EscuderiaController {
     
@@ -32,8 +32,8 @@ public class EscuderiaController {
     }
     
     @GetMapping
-    public ResponseEntity<List<EscuderiaDTO>> obtenerTodas() {
-        return ResponseEntity.ok(escuderiaService.obtenerTodas());
+    public ResponseEntity<List<EscuderiaDTO>> obtenerPorPartida(@PathVariable Integer partidaId) {
+        return ResponseEntity.ok(escuderiaService.obtenerPorPartida(partidaId));
     }
     
     @GetMapping("/{id}")

@@ -21,6 +21,10 @@ public class PilotoCircuitoService {
     public List<PilotoCircuito> obtenerTodos() {
         return pilotoCircuitoRepository.findAll();
     }
+
+    public List<PilotoCircuito> obtenerPorPartida(Integer partidaId) {
+        return pilotoCircuitoRepository.findByIdPartidaId(partidaId);
+    }
     
     public Optional<PilotoCircuito> obtenerPorId(PilotoCircuitoId id) {
         return pilotoCircuitoRepository.findById(id);

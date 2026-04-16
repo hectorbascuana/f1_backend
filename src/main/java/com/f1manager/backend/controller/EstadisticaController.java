@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/estadisticas")
+@RequestMapping("/api/partida/{partidaId}/estadisticas")
 @CrossOrigin(origins = "*")
 public class EstadisticaController {
     
@@ -19,8 +19,8 @@ public class EstadisticaController {
     }
     
     @GetMapping
-    public ResponseEntity<List<Estadistica>> obtenerTodas() {
-        return ResponseEntity.ok(estadisticaService.obtenerTodas());
+    public ResponseEntity<List<Estadistica>> obtenerPorPartida(@PathVariable Integer partidaId) {
+        return ResponseEntity.ok(estadisticaService.obtenerPorPartida(partidaId));
     }
     
     @GetMapping("/{id}")
