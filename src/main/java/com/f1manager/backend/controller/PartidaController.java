@@ -1,12 +1,14 @@
 package com.f1manager.backend.controller;
 
 import com.f1manager.backend.entity.Partida;
+import com.f1manager.backend.dto.PartidaDTO;
 import com.f1manager.backend.service.PartidaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -16,6 +18,11 @@ public class PartidaController {
 
     @Autowired
     private PartidaService partidaService;
+
+    @GetMapping
+    public List<PartidaDTO> obtenerTodas() {
+        return partidaService.obtenerTodas();
+    }
 
     @PostMapping("/nueva")
     public ResponseEntity<?> crearNuevaPartida(@RequestBody com.f1manager.backend.dto.NuevaPartidaDTO request) {

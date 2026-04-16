@@ -19,6 +19,7 @@ CREATE TABLE partida (
     nombre VARCHAR(100) NOT NULL,
     id_escuderia_seleccionada INT NULL, -- Se asignará cuando el jugador elija
     id_proximo_circuito INT NULL,
+    anio INT DEFAULT 2026,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_proximo_circuito) REFERENCES circuito(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;

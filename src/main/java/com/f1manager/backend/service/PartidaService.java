@@ -11,14 +11,19 @@ import com.f1manager.backend.repository.EscuderiaRepository;
 import com.f1manager.backend.repository.PilotoRepository;
 import com.f1manager.backend.repository.EstadisticaRepository;
 import com.f1manager.backend.repository.CircuitoRepository;
+import com.f1manager.backend.dto.PartidaDTO;
+import com.f1manager.backend.dto.CircuitoDTO;
+import com.f1manager.backend.entity.Circuito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.stream.Collectors;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -26,6 +31,36 @@ public class PartidaService {
 
     @Autowired
     private PartidaRepository partidaRepository;
+
+    public List<PartidaDTO> obtenerTodas() {
+        return partidaRepository.findAll().stream()
+                .map(this::toPartidaDTO)
+                .collect(Collectors.toList());
+    }
+
+    public PartidaDTO toPartidaDTO(Partida partida) {
+        PartidaDTO dto = new PartidaDTO();
+        dto.setId(partida.getId());
+        dto.setNombre(partida.getNombre());
+        dto.setIdEscuderiaSeleccionada(partida.getEscuderiaSeleccionada() != null ? partida.getEscuderiaSeleccionada().getId() : null);
+        
+        if (partida.getProximoCircuito() != null) {
+            Circuito c = partida.getProximoCircuito();
+            CircuitoDTO cDto = new CircuitoDTO();
+            cDto.setId(c.getId());
+            cDto.setNombre(c.getNombre());
+            cDto.setPais(c.getPais());
+            cDto.setTiempoBase(c.getTiempoBase());
+            cDto.setNumVueltas(c.getNumVueltas());
+            cDto.setAerodinamicaReq(c.getAerodinamicaReq());
+            cDto.setMotorReq(c.getMotorReq());
+            dto.setProximoCircuito(cDto.getId());
+        }
+        
+        dto.setFechaCreacion(partida.getFechaCreacion());
+        dto.setAnio(partida.getAnio());
+        return dto;
+    }
 
     @Autowired
     private EscuderiaRepository escuderiaRepository;
