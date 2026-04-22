@@ -11,8 +11,16 @@ import lombok.NoArgsConstructor;
 public class PartidaDTO {
     private Integer id;
     private String nombre;
-    private Integer idEscuderiaSeleccionada;
+    private EscuderiaSeleccionadaDTO escuderiaSeleccionada;
     private Integer proximoCircuito;
     private LocalDateTime fechaCreacion;
     private Integer anio;
+
+    @Data
+    public static class EscuderiaSeleccionadaDTO {
+        private Integer id;
+        private String nombre;
+        private String imagen;
+        private Integer presupuesto;
+    }
 }

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import lombok.Data;
 
+
 @Data
 public class EscuderiaDTO {
     private Integer id;
@@ -17,3 +18,5 @@ public class EscuderiaDTO {
     private Integer bancoPruebas;
     private Integer escuelaPilotos;
 }
+
+

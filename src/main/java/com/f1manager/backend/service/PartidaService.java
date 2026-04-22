@@ -12,6 +12,7 @@ import com.f1manager.backend.repository.PilotoRepository;
 import com.f1manager.backend.repository.EstadisticaRepository;
 import com.f1manager.backend.repository.CircuitoRepository;
 import com.f1manager.backend.dto.PartidaDTO;
+import com.f1manager.backend.dto.PartidaDTO.EscuderiaSeleccionadaDTO;
 import com.f1manager.backend.dto.CircuitoDTO;
 import com.f1manager.backend.entity.Circuito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +39,20 @@ public class PartidaService {
                 .collect(Collectors.toList());
     }
 
+    public EscuderiaSeleccionadaDTO toEscuderiaSeleccionadaDTO(Escuderia escuderia) {
+        EscuderiaSeleccionadaDTO dto = new EscuderiaSeleccionadaDTO();
+        dto.setId(escuderia.getId());
+        dto.setNombre(escuderia.getNombre());
+        dto.setImagen(escuderia.getImagen());
+        dto.setPresupuesto(escuderia.getPresupuesto().intValue());
+        return dto;
+    }
+
     public PartidaDTO toPartidaDTO(Partida partida) {
         PartidaDTO dto = new PartidaDTO();
         dto.setId(partida.getId());
         dto.setNombre(partida.getNombre());
-        dto.setIdEscuderiaSeleccionada(partida.getEscuderiaSeleccionada() != null ? partida.getEscuderiaSeleccionada().getId() : null);
+        dto.setEscuderiaSeleccionada(partida.getEscuderiaSeleccionada() != null ? toEscuderiaSeleccionadaDTO(partida.getEscuderiaSeleccionada()) : null);
         
         if (partida.getProximoCircuito() != null) {
             Circuito c = partida.getProximoCircuito();
