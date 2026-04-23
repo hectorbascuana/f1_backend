@@ -39,6 +39,10 @@ public class PartidaService {
                 .collect(Collectors.toList());
     }
 
+    public Partida obtenerPorId(Integer id) {
+        return partidaRepository.findById(id).orElseThrow(() -> new RuntimeException("Partida no encontrada"));
+    }
+
     public EscuderiaSeleccionadaDTO toEscuderiaSeleccionadaDTO(Escuderia escuderia) {
         EscuderiaSeleccionadaDTO dto = new EscuderiaSeleccionadaDTO();
         dto.setId(escuderia.getId());
@@ -69,6 +73,7 @@ public class PartidaService {
         
         dto.setFechaCreacion(partida.getFechaCreacion());
         dto.setAnio(partida.getAnio());
+
         return dto;
     }
 
@@ -98,10 +103,11 @@ public class PartidaService {
         circuitoRepository.findById(1).ifPresent(c -> partida.setProximoCircuito(c));
         Partida partidaGuardada = partidaRepository.save(partida);
 
-        // Load JSON
+        // Load JSON with explicit UTF-8 encoding
         ObjectMapper mapper = new ObjectMapper();
         InputStream is = new ClassPathResource("initial_data.json").getInputStream();
-        JsonNode root = mapper.readTree(is);
+        java.io.Reader reader = new java.io.InputStreamReader(is, java.nio.charset.StandardCharsets.UTF_8);
+        JsonNode root = mapper.readTree(reader);
 
         // Parse Estadisticas
         Map<Integer, Estadistica> mapEstadisticas = new HashMap<>();
@@ -190,4 +196,25 @@ public class PartidaService {
             throw new RuntimeException("La partida no existe");
         }
     }
+
+    @Transactional
+    public Partida avanzarCarrera(Integer id) {
+        Partida p = obtenerPorId(id);
+        int carreraIdActual = p.getProximoCircuito().getId();
+        
+        if (carreraIdActual == 24) {
+            p.setProximoCircuito(circuitoRepository.findById(1).orElseThrow(() -> new RuntimeException("Circuito 1 no encontrado")));
+            p.setAnio(p.getAnio() + 1);
+        } else {
+            p.setProximoCircuito(circuitoRepository.findById(carreraIdActual + 1).orElseThrow(() -> new RuntimeException("Siguiente circuito no encontrado")));
+        }
+        
+        return partidaRepository.save(p);
+    }
+
+    public void guardar(Partida p) {
+        partidaRepository.save(p);
+    }
+
+    
 }

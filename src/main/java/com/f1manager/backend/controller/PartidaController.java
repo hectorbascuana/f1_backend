@@ -28,11 +28,7 @@ public class PartidaController {
     public ResponseEntity<?> crearNuevaPartida(@RequestBody com.f1manager.backend.dto.NuevaPartidaDTO request) {
         try {
             Partida p = partidaService.crearNuevaPartida(request.getNombre(), request.getIdEscuderiaJson());
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "ok");
-            response.put("partidaId", p.getId());
-            response.put("mensaje", "Partida generada existosamente con la escudería ID " + request.getIdEscuderiaJson());
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(partidaService.toPartidaDTO(p));
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("status", "error");
@@ -56,4 +52,18 @@ public class PartidaController {
             return ResponseEntity.badRequest().body(error);
         }
     }
+
+    @PostMapping("/{id}/avanzar")
+    public ResponseEntity<?> avanzarCarrera(@PathVariable Integer id) {
+        try {
+            Partida p = partidaService.avanzarCarrera(id);
+            return ResponseEntity.ok(partidaService.toPartidaDTO(p));
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("status", "error");
+            error.put("mensaje", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
 }

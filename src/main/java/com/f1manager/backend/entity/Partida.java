@@ -34,6 +34,7 @@ public class Partida {
     @Column(name = "anio")
     private Integer anio;
 
+
     @PrePersist
     protected void onCreate() {
         fechaCreacion = LocalDateTime.now();

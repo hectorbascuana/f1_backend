@@ -3,10 +3,13 @@ services:
     image: mysql:8.0
     container_name: f1_manager_db
     restart: always
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
       MYSQL_DATABASE: f1_manager
       MYSQL_ROOT_PASSWORD: root
       MYSQL_ROOT_HOST: '%'
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
     ports:
       - "3306:3306"
     volumes:
@@ -35,7 +38,7 @@ services:
       - "8081:8080"
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/f1_manager?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/f1_manager?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8&useUnicode=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
     networks:

@@ -16,6 +16,7 @@ public class PartidaDTO {
     private LocalDateTime fechaCreacion;
     private Integer anio;
 
+
     @Data
     public static class EscuderiaSeleccionadaDTO {
         private Integer id;
