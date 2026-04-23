@@ -15,13 +15,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.f1manager.backend.dto.EscuderiaDTO;
-import com.f1manager.backend.dto.EscuderiaMejoraDTO;
+import com.f1manager.backend.dto.MejoraRequestDTO;
+
 import com.f1manager.backend.dto.EscuderiaMejoraTipo;
 import com.f1manager.backend.entity.Escuderia;
 import com.f1manager.backend.service.EscuderiaService;
 
 @RestController
-@RequestMapping("/api/partida/{partidaId}/escuderias")
+@RequestMapping("/api/escuderias")
 @CrossOrigin(origins = "*")
 public class EscuderiaController {
     
@@ -31,7 +32,7 @@ public class EscuderiaController {
         this.escuderiaService = escuderiaService;
     }
     
-    @GetMapping
+    @GetMapping("/partida/{partidaId}")
     public ResponseEntity<List<EscuderiaDTO>> obtenerPorPartida(@PathVariable Integer partidaId) {
         return ResponseEntity.ok(escuderiaService.obtenerPorPartida(partidaId));
     }
@@ -62,13 +63,13 @@ public class EscuderiaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}/mejora/{tipo}")
-    public ResponseEntity<EscuderiaDTO> mejorar(@PathVariable Integer id,
-                                                @PathVariable String tipo,
-                                                @RequestBody EscuderiaMejoraDTO mejora) {
+    @PutMapping("/mejorar")
+    public ResponseEntity<EscuderiaDTO> mejorar(@RequestBody MejoraRequestDTO request) {
         try {
-            EscuderiaMejoraTipo mejoraTipo = EscuderiaMejoraTipo.from(tipo);
-            return escuderiaService.mejorarEscuderia(id, mejoraTipo, mejora)
+            EscuderiaMejoraTipo mejoraTipo = EscuderiaMejoraTipo.from(request.getTipoMejora());
+            // Por ahora solo vamos a identificar qué se quiere mejorar. 
+            // En el servicio actualizaremos la lógica para procesar este tipo específico.
+            return escuderiaService.procesarMejora(request.getEscuderiaId(), mejoraTipo)
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
         } catch (IllegalArgumentException ex) {
@@ -84,4 +85,6 @@ public class EscuderiaController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    
 }

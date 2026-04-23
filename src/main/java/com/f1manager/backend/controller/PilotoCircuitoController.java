@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/partida/{partidaId}/piloto-circuito")
+@RequestMapping("/api/piloto-circuito")
 @CrossOrigin(origins = "*")
 public class PilotoCircuitoController {
     
@@ -19,7 +19,7 @@ public class PilotoCircuitoController {
         this.pilotoCircuitoService = pilotoCircuitoService;
     }
     
-    @GetMapping
+    @GetMapping("/partida/{partidaId}")
     public ResponseEntity<List<PilotoCircuito>> obtenerPorPartida(@PathVariable Integer partidaId) {
         return ResponseEntity.ok(pilotoCircuitoService.obtenerPorPartida(partidaId));
     }
@@ -30,7 +30,7 @@ public class PilotoCircuitoController {
                 .body(pilotoCircuitoService.guardar(pilotoCircuito));
     }
     
-    @DeleteMapping("/{circuitoId}/{pilotoId}/{temporada}")
+    @DeleteMapping("/{partidaId}/{circuitoId}/{pilotoId}/{temporada}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer partidaId,
                                          @PathVariable Integer circuitoId,
                                          @PathVariable Integer pilotoId,

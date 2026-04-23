@@ -7,20 +7,19 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.f1manager.backend.dto.EscuderiaDTO;
-import com.f1manager.backend.dto.EscuderiaMejoraDTO;
 import com.f1manager.backend.dto.EscuderiaMejoraTipo;
 import com.f1manager.backend.entity.Escuderia;
 import com.f1manager.backend.repository.EscuderiaRepository;
 
 @Service
 public class EscuderiaService {
-    
+
     private final EscuderiaRepository escuderiaRepository;
-    
+
     public EscuderiaService(EscuderiaRepository escuderiaRepository) {
         this.escuderiaRepository = escuderiaRepository;
     }
-    
+
     public List<EscuderiaDTO> obtenerTodas() {
         return escuderiaRepository.findAll().stream()
                 .map(this::toEscuderiaDTO)
@@ -32,18 +31,21 @@ public class EscuderiaService {
                 .map(this::toEscuderiaDTO)
                 .collect(Collectors.toList());
     }
-    
+
     public Optional<EscuderiaDTO> obtenerPorId(Integer id) {
         return escuderiaRepository.findById(id)
                 .map(this::toEscuderiaDTO);
     }
-    
-    public Optional<EscuderiaDTO> mejorarEscuderia(Integer id, EscuderiaMejoraTipo tipo, EscuderiaMejoraDTO mejora) {
+
+    public Optional<EscuderiaDTO> procesarMejora(Integer id, EscuderiaMejoraTipo tipo) {
         return escuderiaRepository.findById(id).map(escuderia -> {
             switch (tipo) {
-                case BASICA -> aplicarMejoraBasica(escuderia, mejora);
-                case DURABILIDAD -> aplicarMejoraDurabilidad(escuderia, mejora);
-                case INSTALACIONES -> aplicarMejoraInstalaciones(escuderia, mejora);
+                case AERODINAMICA -> escuderia.mejorarAerodinamica();
+                case MOTOR -> escuderia.mejorarMotor();
+                case DURABILIDAD -> escuderia.mejorarDurabilidad();
+                case TUNEL_VIENTO -> escuderia.mejorarTunelViento();
+                case BANCO_PRUEBAS -> escuderia.mejorarBancoPruebas();
+                case ESCUELA_PILOTOS -> escuderia.mejorarEscuelaPilotos();
             }
             return toEscuderiaDTO(escuderiaRepository.save(escuderia));
         });
@@ -52,47 +54,9 @@ public class EscuderiaService {
     public Escuderia guardar(Escuderia escuderia) {
         return escuderiaRepository.save(escuderia);
     }
-    
+
     public void eliminar(Integer id) {
         escuderiaRepository.deleteById(id);
-    }
-
-    private void aplicarMejoraBasica(Escuderia escuderia, EscuderiaMejoraDTO mejora) {
-        boolean incremento = mejora.getModo() == null || mejora.getModo().equalsIgnoreCase("incremento");
-
-        if (mejora.getAerodinamica() != null) {
-            int valor = incremento ? escuderia.getAerodinamica() + mejora.getAerodinamica() : mejora.getAerodinamica();
-            escuderia.setAerodinamica(clamp(valor, 1, 100));
-        }
-        if (mejora.getMotor() != null) {
-            int valor = incremento ? escuderia.getMotor() + mejora.getMotor() : mejora.getMotor();
-            escuderia.setMotor(clamp(valor, 1, 100));
-        }
-    }
-
-    private void aplicarMejoraDurabilidad(Escuderia escuderia, EscuderiaMejoraDTO mejora) {
-        if (mejora.getDurabilidad() != null) {
-            boolean incremento = mejora.getModo() == null || mejora.getModo().equalsIgnoreCase("incremento");
-            int valor = incremento ? escuderia.getDurabilidad() + mejora.getDurabilidad() : mejora.getDurabilidad();
-            escuderia.setDurabilidad(clamp(valor, 1, 20));
-        }
-    }
-
-    private void aplicarMejoraInstalaciones(Escuderia escuderia, EscuderiaMejoraDTO mejora) {
-        boolean incremento = mejora.getModo() == null || mejora.getModo().equalsIgnoreCase("incremento");
-
-        if (mejora.getTunelViento() != null) {
-            int valor = incremento ? escuderia.getTunelViento() + mejora.getTunelViento() : mejora.getTunelViento();
-            escuderia.setTunelViento(clamp(valor, 1, 5));
-        }
-        if (mejora.getBancoPruebas() != null) {
-            int valor = incremento ? escuderia.getBancoPruebas() + mejora.getBancoPruebas() : mejora.getBancoPruebas();
-            escuderia.setBancoPruebas(clamp(valor, 1, 5));
-        }
-        if (mejora.getEscuelaPilotos() != null) {
-            int valor = incremento ? escuderia.getEscuelaPilotos() + mejora.getEscuelaPilotos() : mejora.getEscuelaPilotos();
-            escuderia.setEscuelaPilotos(clamp(valor, 1, 5));
-        }
     }
 
     private int clamp(int value, int min, int max) {
@@ -111,6 +75,32 @@ public class EscuderiaService {
         dto.setTunelViento(escuderia.getTunelViento());
         dto.setBancoPruebas(escuderia.getBancoPruebas());
         dto.setEscuelaPilotos(escuderia.getEscuelaPilotos());
+        dto.setAerodinamicaCosto(costeMejoraBasica(escuderia.getAerodinamica()));
+        dto.setMotorCosto(costeMejoraBasica(escuderia.getMotor()));
+        dto.setDurabilidadCosto(costeMejoraDurabilidad(escuderia.getDurabilidad()));
+        dto.setTunelVientoCosto(costeMejoraInstalacion(escuderia.getTunelViento()));
+        dto.setBancoPruebasCosto(costeMejoraInstalacion(escuderia.getBancoPruebas()));
+        dto.setEscuelaPilotosCosto(costeMejoraEscuela(escuderia.getEscuelaPilotos()));
         return dto;
+    }
+
+    private Float costeMejoraBasica(Integer nivel) {
+        return redondear((float) (0.5 + Math.pow(nivel, 2) * 0.01));
+    }
+
+    private Float costeMejoraDurabilidad(Integer nivel) {
+        return redondear((float) (0.5 + Math.pow(nivel, 2) * 0.2));
+    }
+
+    private Float costeMejoraInstalacion(Integer nivel) {
+        return redondear((float) (15 + (15 * Math.pow(1.8, nivel))));
+    }
+
+    private Float costeMejoraEscuela(Integer nivel) {
+        return redondear((float) (15 + (12 * Math.pow(1.8, nivel))));
+    }
+
+    private Float redondear(float valor) {
+        return (float) (Math.round(valor * 100.0) / 100.0);
     }
 }

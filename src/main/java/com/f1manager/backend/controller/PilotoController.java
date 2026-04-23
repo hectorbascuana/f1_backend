@@ -19,7 +19,7 @@ import com.f1manager.backend.entity.Piloto;
 import com.f1manager.backend.service.PilotoService;
 
 @RestController
-@RequestMapping("/api/partida/{partidaId}/pilotos")
+@RequestMapping("/api/pilotos")
 @CrossOrigin(origins = "*")
 public class PilotoController {
     
@@ -29,7 +29,7 @@ public class PilotoController {
         this.pilotoService = pilotoService;
     }
     
-    @GetMapping
+    @GetMapping("/partida/{partidaId}")
     public ResponseEntity<List<Piloto>> obtenerPorPartida(@PathVariable Integer partidaId) {
         return ResponseEntity.ok(pilotoService.obtenerPorPartida(partidaId));
     }
