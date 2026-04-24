@@ -18,6 +18,7 @@ import com.f1manager.backend.dto.EscuderiaDTO;
 import com.f1manager.backend.dto.MejoraRequestDTO;
 
 import com.f1manager.backend.dto.EscuderiaMejoraTipo;
+import com.f1manager.backend.dto.LineupRequestDTO;
 import com.f1manager.backend.entity.Escuderia;
 import com.f1manager.backend.service.EscuderiaService;
 
@@ -67,9 +68,19 @@ public class EscuderiaController {
     public ResponseEntity<?> mejorar(@RequestBody MejoraRequestDTO request) {
         try {
             EscuderiaMejoraTipo mejoraTipo = EscuderiaMejoraTipo.from(request.getTipoMejora());
-            // Por ahora solo vamos a identificar qué se quiere mejorar. 
-            // En el servicio actualizaremos la lógica para procesar este tipo específico.
             return escuderiaService.procesarMejora(request.getEscuderiaId(), mejoraTipo)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ex.getMessage());
+        }
+    }
+
+    @PutMapping("/alineacion")
+    public ResponseEntity<?> gestionarAlineacion(@RequestBody LineupRequestDTO request) {
+        try {
+            return escuderiaService.gestionarAsiento(request)
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
         } catch (IllegalArgumentException ex) {

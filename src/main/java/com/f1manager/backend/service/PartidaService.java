@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 @Service
 public class PartidaService {
@@ -198,6 +199,9 @@ public class PartidaService {
             }
         }
 
+        // Generar un piloto reserva aleatorio para cada equipo
+        generarPilotosReserva(partidaGuardada, mapEscuderias);
+
         // Final pass: Link starting pilots to teams
         for (Map.Entry<Integer, Escuderia> entry : mapEscuderias.entrySet()) {
             Integer teamJsonId = entry.getKey();
@@ -249,5 +253,42 @@ public class PartidaService {
         partidaRepository.save(p);
     }
 
-    
+    private void generarPilotosReserva(Partida partida, Map<Integer, Escuderia> mapEscuderias) {
+        String[] nombres = {"Lucas", "Mateo", "Liam", "Noah", "Leo", "Oliver", "Arthur", "Finn", "Hugo", "Arno", "Santi", "Pau", "Marc", "Erik", "Lars", "Timo", "Jan", "Klaus", "Ben", "Dan", "Iker", "Theo", "Jonas", "Felipe", "Alex"};
+        String[] apellidos = {"Silva", "Müller", "Rossi", "García", "Smith", "Lefebvre", "Ivanov", "Sato", "Khan", "O'Connor", "Junior", "Santos", "Costa", "Popescu", "Varga", "Sørensen", "Bakker", "Novák", "Petrov", "Larsen", "Schmidt", "Dubois", "Moretti", "Vidal", "Becker"};
+        String[] paises = {"Portugal", "Alemania", "Italia", "España", "Reino Unido", "Francia", "Rusia", "Japón", "India", "Irlanda", "Brasil", "Rumanía", "Hungría", "Dinamarca", "Países Bajos", "Chequia", "Noruega", "Argentina", "México", "EE. UU.", "Canadá", "Australia"};
+
+        Random random = new Random();
+
+        for (Escuderia escuderia : mapEscuderias.values()) {
+            // Create Estadistica for the reserve
+            Estadistica est = new Estadistica();
+            est.setPartida(partida);
+            
+            // Stats range 60-75
+            int valoracion = 60 + random.nextInt(16); 
+            est.setValoracion(valoracion);
+            est.setCurvaRapida(55 + random.nextInt(valoracion - 50));
+            est.setCurvaLenta(55 + random.nextInt(valoracion - 50));
+            est.setSalidas(50 + random.nextInt(valoracion - 45));
+            est.setConsistencia(45 + random.nextInt(valoracion - 40));
+            
+            est = estadisticaRepository.save(est);
+
+            // Create Piloto
+            Piloto p = new Piloto();
+            p.setPartida(partida);
+            String nombreCompleto = nombres[random.nextInt(nombres.length)] + " " + apellidos[random.nextInt(apellidos.length)];
+            p.setNombre(nombreCompleto);
+            p.setPais(paises[random.nextInt(paises.length)]);
+            p.setImagen("assets/drivers/generic_reserve.png");
+            p.setEdad(16 + random.nextInt(5)); // 16-20 years
+            p.setPuntos(0);
+            p.setValor(BigDecimal.valueOf(1 + random.nextInt(5))); // 1-5 million
+            p.setEscuderia(escuderia);
+            p.setEstadistica(est);
+
+            pilotoRepository.save(p);
+        }
+    }
 }

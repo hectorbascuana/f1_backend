@@ -11,16 +11,26 @@ import org.springframework.stereotype.Service;
 
 import com.f1manager.backend.dto.EscuderiaDTO;
 import com.f1manager.backend.dto.EscuderiaMejoraTipo;
+import com.f1manager.backend.dto.LineupRequestDTO;
 import com.f1manager.backend.entity.Escuderia;
+import com.f1manager.backend.entity.Piloto;
 import com.f1manager.backend.repository.EscuderiaRepository;
+import com.f1manager.backend.repository.PilotoRepository;
+import org.springframework.context.annotation.Lazy;
 
 @Service
 public class EscuderiaService {
 
     private final EscuderiaRepository escuderiaRepository;
+    private final PilotoRepository pilotoRepository;
+    private final PilotoService pilotoService;
 
-    public EscuderiaService(EscuderiaRepository escuderiaRepository) {
+    public EscuderiaService(EscuderiaRepository escuderiaRepository, 
+                            PilotoRepository pilotoRepository,
+                            @Lazy PilotoService pilotoService) {
         this.escuderiaRepository = escuderiaRepository;
+        this.pilotoRepository = pilotoRepository;
+        this.pilotoService = pilotoService;
     }
 
     public List<EscuderiaDTO> obtenerTodas() {
@@ -96,6 +106,30 @@ public class EscuderiaService {
         escuderiaRepository.deleteById(id);
     }
 
+    public Optional<EscuderiaDTO> gestionarAsiento(LineupRequestDTO request) {
+        return escuderiaRepository.findById(request.getEscuderiaId()).map(esc -> {
+            if (request.getPilotoId() == null) {
+                // Caso: Bajar al piloto del asiento
+                if (request.getAsiento() == 1) esc.setPiloto1(null);
+                else if (request.getAsiento() == 2) esc.setPiloto2(null);
+            } else {
+                // Caso: Asignar piloto a un asiento
+                Piloto p = pilotoRepository.findById(request.getPilotoId())
+                        .orElseThrow(() -> new RuntimeException("Piloto no encontrado"));
+                
+                // Validar que el piloto pertenece al equipo
+                if (!p.getEscuderia().getId().equals(esc.getId())) {
+                    throw new IllegalArgumentException("El piloto no pertenece a esta escudería");
+                }
+
+                if (request.getAsiento() == 1) esc.setPiloto1(p);
+                else if (request.getAsiento() == 2) esc.setPiloto2(p);
+            }
+            
+            return toEscuderiaDTO(escuderiaRepository.save(esc));
+        });
+    }
+
 
 
     public EscuderiaDTO toEscuderiaDTO(Escuderia escuderia) {
@@ -116,6 +150,14 @@ public class EscuderiaService {
         dto.setTunelVientoCosto(costeMejoraInstalacion(escuderia.getTunelViento()));
         dto.setBancoPruebasCosto(costeMejoraInstalacion(escuderia.getBancoPruebas()));
         dto.setEscuelaPilotosCosto(costeMejoraEscuela(escuderia.getEscuelaPilotos()));
+        
+        if (escuderia.getPiloto1() != null) {
+            dto.setPiloto1(pilotoService.toPilotoResumenDTO(escuderia.getPiloto1()));
+        }
+        if (escuderia.getPiloto2() != null) {
+            dto.setPiloto2(pilotoService.toPilotoResumenDTO(escuderia.getPiloto2()));
+        }
+        
         return dto;
     }
 

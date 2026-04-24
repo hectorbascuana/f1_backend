@@ -23,6 +23,8 @@ public class EscuderiaDTO {
     private Float bancoPruebasCosto;
     private Integer escuelaPilotos;
     private Float escuelaPilotosCosto;
+    private PilotoResumenDTO piloto1;
+    private PilotoResumenDTO piloto2;
 }
 
 
