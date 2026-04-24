@@ -128,6 +128,8 @@ public class PartidaService {
 
         // Parse Escuderias
         Map<Integer, Escuderia> mapEscuderias = new HashMap<>();
+        Map<Integer, Integer> mapEscuderiaPiloto1 = new HashMap<>();
+        Map<Integer, Integer> mapEscuderiaPiloto2 = new HashMap<>();
         Escuderia escuderiaSeleccionada = null;
         JsonNode escNode = root.get("escuderias");
         if (escNode != null && escNode.isArray()) {
@@ -147,6 +149,13 @@ public class PartidaService {
                 esc = escuderiaRepository.save(esc);
                 mapEscuderias.put(jsonId, esc);
 
+                if (node.has("id_piloto_1")) {
+                    mapEscuderiaPiloto1.put(jsonId, node.get("id_piloto_1").asInt());
+                }
+                if (node.has("id_piloto_2")) {
+                    mapEscuderiaPiloto2.put(jsonId, node.get("id_piloto_2").asInt());
+                }
+
                 // If this is the chosen team (by JSON ID), store it
                 if (jsonId == idEscuderiaJson) {
                     escuderiaSeleccionada = esc;
@@ -163,6 +172,7 @@ public class PartidaService {
         }
 
         // Parse Pilotos
+        Map<Integer, Piloto> mapPilotos = new HashMap<>();
         JsonNode pilNode = root.get("pilotos");
         if (pilNode != null && pilNode.isArray()) {
             for (JsonNode node : pilNode) {
@@ -181,7 +191,30 @@ public class PartidaService {
                 if (node.has("estadistica_id")) {
                     p.setEstadistica(mapEstadisticas.get(node.get("estadistica_id").asInt()));
                 }
-                pilotoRepository.save(p);
+                p = pilotoRepository.save(p);
+                if (node.has("id")) {
+                    mapPilotos.put(node.get("id").asInt(), p);
+                }
+            }
+        }
+
+        // Final pass: Link starting pilots to teams
+        for (Map.Entry<Integer, Escuderia> entry : mapEscuderias.entrySet()) {
+            Integer teamJsonId = entry.getKey();
+            Escuderia esc = entry.getValue();
+            boolean changed = false;
+
+            if (mapEscuderiaPiloto1.containsKey(teamJsonId)) {
+                esc.setPiloto1(mapPilotos.get(mapEscuderiaPiloto1.get(teamJsonId)));
+                changed = true;
+            }
+            if (mapEscuderiaPiloto2.containsKey(teamJsonId)) {
+                esc.setPiloto2(mapPilotos.get(mapEscuderiaPiloto2.get(teamJsonId)));
+                changed = true;
+            }
+
+            if (changed) {
+                escuderiaRepository.save(esc);
             }
         }
 

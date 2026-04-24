@@ -50,16 +50,14 @@ CREATE TABLE escuderia (
     nombre VARCHAR(100) NOT NULL,
     imagen VARCHAR(255),
     presupuesto DECIMAL(15, 2) DEFAULT 0.00,
-    aerodinamica INT DEFAULT 1 CHECK (
-        aerodinamica BETWEEN 1 AND 100
-    ),
-    motor INT DEFAULT 1 CHECK (motor BETWEEN 1 AND 100),
+    id_piloto_1 INT NULL,
+    id_piloto_2 INT NULL,
+    aerodinamica INT DEFAULT 1 CHECK (aerodinamica BETWEEN 1 AND 99),
+    motor INT DEFAULT 1 CHECK (motor BETWEEN 1 AND 99),
     durabilidad INT DEFAULT 1 CHECK (durabilidad BETWEEN 1 AND 20),
     tunel_viento INT DEFAULT 1 CHECK (tunel_viento BETWEEN 1 AND 5),
     banco_pruebas INT DEFAULT 1 CHECK (banco_pruebas BETWEEN 1 AND 5),
-    escuela_pilotos INT DEFAULT 1 CHECK (
-        escuela_pilotos BETWEEN 1 AND 5
-    ),
+    escuela_pilotos INT DEFAULT 1 CHECK (escuela_pilotos BETWEEN 1 AND 5),
     FOREIGN KEY (partida_id) REFERENCES partida (id) ON DELETE CASCADE
 ) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -100,9 +98,31 @@ CREATE TABLE piloto_circuito (
     FOREIGN KEY (piloto_id) REFERENCES piloto (id)
 ) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- 7 Tabla de transpasos
+CREATE TABLE traspaso (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    partida_id INT NOT NULL,
+    piloto_id INT NOT NULL,
+    escuderia_origen_id INT,
+    escuderia_destino_id INT,
+    precio DECIMAL(15, 2),
+    temporada INT,
+    aceptada BOOLEAN DEFAULT FALSE,
+    en_curso BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (partida_id) REFERENCES partida (id) ON DELETE CASCADE,
+    FOREIGN KEY (piloto_id) REFERENCES piloto (id) ON DELETE CASCADE,
+    FOREIGN KEY (escuderia_origen_id) REFERENCES escuderia (id) ON DELETE SET NULL,
+    FOREIGN KEY (escuderia_destino_id) REFERENCES escuderia (id) ON DELETE SET NULL
+) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; 
+
 -- Alterar Partida para referenciar a Escuderia, solucionando la dependencia circular
 ALTER TABLE partida
 ADD FOREIGN KEY (id_escuderia_seleccionada) REFERENCES escuderia (id) ON DELETE SET NULL;
+
+-- Alterar Escuderia para referenciar a Pilotos, solucionando la dependencia circular
+ALTER TABLE escuderia
+ADD CONSTRAINT fk_escuderia_piloto1 FOREIGN KEY (id_piloto_1) REFERENCES piloto (id) ON DELETE SET NULL,
+ADD CONSTRAINT fk_escuderia_piloto2 FOREIGN KEY (id_piloto_2) REFERENCES piloto (id) ON DELETE SET NULL;
 
 -- ==========================================================
 -- CIRCUITOS (Calendario 2026 - Se mantienen porque son estáticos y globales)

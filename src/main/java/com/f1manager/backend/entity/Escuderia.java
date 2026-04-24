@@ -66,6 +66,14 @@ public class Escuderia {
     @Column(name = "escuela_pilotos")
     private Integer escuelaPilotos;
 
+    @ManyToOne
+    @JoinColumn(name = "id_piloto_1")
+    private Piloto piloto1;
+
+    @ManyToOne
+    @JoinColumn(name = "id_piloto_2")
+    private Piloto piloto2;
+
     @OneToMany(mappedBy = "escuderia", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("escuderia")
     private List<Piloto> pilotos;

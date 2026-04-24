@@ -1,6 +1,5 @@
 package com.f1manager.backend.dto;
 
-import java.math.BigDecimal;
 
 import lombok.Data;
 
