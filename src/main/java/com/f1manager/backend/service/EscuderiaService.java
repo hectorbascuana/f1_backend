@@ -1,5 +1,8 @@
 package com.f1manager.backend.service;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,17 +40,51 @@ public class EscuderiaService {
                 .map(this::toEscuderiaDTO);
     }
 
-    public Optional<EscuderiaDTO> procesarMejora(Integer id, EscuderiaMejoraTipo tipo) {
+    public Optional<Map<String, Object>> procesarMejora(Integer id, EscuderiaMejoraTipo tipo) {
         return escuderiaRepository.findById(id).map(escuderia -> {
-            switch (tipo) {
+            Integer aumento = switch (tipo) {
                 case AERODINAMICA -> escuderia.mejorarAerodinamica();
                 case MOTOR -> escuderia.mejorarMotor();
                 case DURABILIDAD -> escuderia.mejorarDurabilidad();
                 case TUNEL_VIENTO -> escuderia.mejorarTunelViento();
                 case BANCO_PRUEBAS -> escuderia.mejorarBancoPruebas();
                 case ESCUELA_PILOTOS -> escuderia.mejorarEscuelaPilotos();
+            };
+
+            escuderiaRepository.save(escuderia);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("presupuesto", escuderia.getPresupuesto().setScale(2, RoundingMode.HALF_UP));
+            response.put("aumento", aumento);
+
+            switch (tipo) {
+                case AERODINAMICA -> {
+                    response.put("nivelActual", escuderia.getAerodinamica());
+                    response.put("nuevoCoste", costeMejoraBasica(escuderia.getAerodinamica()));
+                }
+                case MOTOR -> {
+                    response.put("nivelActual", escuderia.getMotor());
+                    response.put("nuevoCoste", costeMejoraBasica(escuderia.getMotor()));
+                }
+                case DURABILIDAD -> {
+                    response.put("nivelActual", escuderia.getDurabilidad());
+                    response.put("nuevoCoste", costeMejoraDurabilidad(escuderia.getDurabilidad()));
+                }
+                case TUNEL_VIENTO -> {
+                    response.put("nivelActual", escuderia.getTunelViento());
+                    response.put("nuevoCoste", costeMejoraInstalacion(escuderia.getTunelViento()));
+                }
+                case BANCO_PRUEBAS -> {
+                    response.put("nivelActual", escuderia.getBancoPruebas());
+                    response.put("nuevoCoste", costeMejoraInstalacion(escuderia.getBancoPruebas()));
+                }
+                case ESCUELA_PILOTOS -> {
+                    response.put("nivelActual", escuderia.getEscuelaPilotos());
+                    response.put("nuevoCoste", costeMejoraEscuela(escuderia.getEscuelaPilotos()));
+                }
             }
-            return toEscuderiaDTO(escuderiaRepository.save(escuderia));
+
+            return response;
         });
     }
 
@@ -59,9 +96,7 @@ public class EscuderiaService {
         escuderiaRepository.deleteById(id);
     }
 
-    private int clamp(int value, int min, int max) {
-        return Math.min(Math.max(value, min), max);
-    }
+
 
     public EscuderiaDTO toEscuderiaDTO(Escuderia escuderia) {
         EscuderiaDTO dto = new EscuderiaDTO();
@@ -84,23 +119,23 @@ public class EscuderiaService {
         return dto;
     }
 
-    private Float costeMejoraBasica(Integer nivel) {
+    public static Float costeMejoraBasica(Integer nivel) {
         return redondear((float) (0.5 + Math.pow(nivel, 2) * 0.01));
     }
 
-    private Float costeMejoraDurabilidad(Integer nivel) {
+    public static Float costeMejoraDurabilidad(Integer nivel) {
         return redondear((float) (0.5 + Math.pow(nivel, 2) * 0.2));
     }
 
-    private Float costeMejoraInstalacion(Integer nivel) {
+    public static Float costeMejoraInstalacion(Integer nivel) {
         return redondear((float) (15 + (15 * Math.pow(1.8, nivel))));
     }
 
-    private Float costeMejoraEscuela(Integer nivel) {
+    public static Float costeMejoraEscuela(Integer nivel) {
         return redondear((float) (15 + (12 * Math.pow(1.8, nivel))));
     }
 
-    private Float redondear(float valor) {
+    private static Float redondear(float valor) {
         return (float) (Math.round(valor * 100.0) / 100.0);
     }
 }

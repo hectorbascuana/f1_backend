@@ -1,5 +1,6 @@
 package com.f1manager.backend.entity;
 
+import com.f1manager.backend.service.EscuderiaService;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -69,9 +70,13 @@ public class Escuderia {
     @JsonIgnoreProperties("escuderia")
     private List<Piloto> pilotos;
 
-    public void mejorarAerodinamica() {
+    public Integer mejorarAerodinamica() {
         int nivel = this.getAerodinamica();
-        int aumento;
+        float coste = EscuderiaService.costeMejoraBasica(nivel);
+        BigDecimal presupuesto = this.getPresupuesto();
+        restaPresupuesto(coste, presupuesto);
+        
+        int aumento = 0;
         if(nivel < 99){
             int nivelTunelViento = this.getTunelViento();
             int ale = new Random().nextInt(100);
@@ -142,16 +147,19 @@ public class Escuderia {
                     aumento = 0;
                     break;
             }
-            this.aerodinamica += aumento;
+            this.aerodinamica = Math.min(nivel + aumento, 99);
         }
-        
-            
+        return aumento;
     }
 
-    public void mejorarMotor() {
+    public Integer mejorarMotor() {
         int nivel = this.getMotor();
-        int aumento;
-        if(nivel < 100){
+        BigDecimal presupuesto = this.getPresupuesto();
+        float coste = EscuderiaService.costeMejoraBasica(nivel);
+        restaPresupuesto(coste, presupuesto);
+        
+        int aumento = 0;
+        if(nivel < 100){    
             int nivelBancoPruebas = this.getBancoPruebas();
             int ale = new Random().nextInt(100);
             switch (nivelBancoPruebas) {
@@ -221,23 +229,55 @@ public class Escuderia {
                     aumento = 0;
                     break;
             }
-            this.motor += aumento;
+            this.motor = Math.min(nivel + aumento, 99);
         }
+        return aumento;
     }
 
-    public void mejorarDurabilidad() {
-        this.durabilidad = Math.min(this.durabilidad + 1, 20);
+    public Integer mejorarDurabilidad() {
+        int nivel = this.getDurabilidad();
+        BigDecimal presupuesto = this.getPresupuesto();
+        float coste = EscuderiaService.costeMejoraDurabilidad(nivel);
+        restaPresupuesto(coste, presupuesto);
+        
+        this.durabilidad = Math.min(nivel + 1, 20);
+        return 1;
     }
 
-    public void mejorarTunelViento() {
-        this.tunelViento = Math.min(this.tunelViento + 1, 5);
+    public Integer mejorarTunelViento() {
+        int nivel = this.getTunelViento();
+        BigDecimal presupuesto = this.getPresupuesto();
+        float coste = EscuderiaService.costeMejoraInstalacion(nivel);
+        restaPresupuesto(coste, presupuesto);
+        
+        this.tunelViento = Math.min(nivel + 1, 5);
+        return 1;
     }
 
-    public void mejorarBancoPruebas() {
-        this.bancoPruebas = Math.min(this.bancoPruebas + 1, 5);
+    public Integer mejorarBancoPruebas() {
+        int nivel = this.getBancoPruebas();
+        BigDecimal presupuesto = this.getPresupuesto();
+        float coste = EscuderiaService.costeMejoraInstalacion(nivel);
+        restaPresupuesto(coste, presupuesto);
+        
+        this.bancoPruebas = Math.min(nivel + 1, 5);
+        return 1;
     }
 
-    public void mejorarEscuelaPilotos() {
-        this.escuelaPilotos = Math.min(this.escuelaPilotos + 1, 5);
+    public Integer mejorarEscuelaPilotos() {
+        int nivel = this.getEscuelaPilotos();
+        BigDecimal presupuesto = this.getPresupuesto();
+        float coste = EscuderiaService.costeMejoraEscuela(nivel);
+        restaPresupuesto(coste, presupuesto);
+        
+        this.escuelaPilotos = Math.min(nivel + 1, 5);
+        return 1;
+    }
+
+    public void restaPresupuesto(float coste, BigDecimal presupuesto) {
+        if(presupuesto.compareTo(BigDecimal.valueOf(coste)) < 0){
+            throw new IllegalArgumentException("Presupuesto insuficiente");
+        }
+        this.presupuesto = presupuesto.subtract(BigDecimal.valueOf(coste));
     }
 }

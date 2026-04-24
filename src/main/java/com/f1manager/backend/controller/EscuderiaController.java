@@ -64,7 +64,7 @@ public class EscuderiaController {
     }
 
     @PutMapping("/mejorar")
-    public ResponseEntity<EscuderiaDTO> mejorar(@RequestBody MejoraRequestDTO request) {
+    public ResponseEntity<?> mejorar(@RequestBody MejoraRequestDTO request) {
         try {
             EscuderiaMejoraTipo mejoraTipo = EscuderiaMejoraTipo.from(request.getTipoMejora());
             // Por ahora solo vamos a identificar qué se quiere mejorar. 
@@ -73,7 +73,8 @@ public class EscuderiaController {
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ex.getMessage());
         }
     }
     
