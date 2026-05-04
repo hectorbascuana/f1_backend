@@ -11,4 +11,5 @@ public interface TraspasoRepository extends JpaRepository<Traspaso, Integer> {
     List<Traspaso> findByPilotoId(Integer pilotoId);
     List<Traspaso> findByEnCursoTrue();
     List<Traspaso> findByPartidaIdAndEnCursoTrue(Integer partidaId);
+    List<Traspaso> findByPilotoIdAndEnCursoTrue(Integer pilotoId);
 }

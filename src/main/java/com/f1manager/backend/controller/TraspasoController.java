@@ -36,6 +36,11 @@ public class TraspasoController {
         return traspasoService.obtenerActivosPorPartida(partidaId);
     }
 
+    @GetMapping("/piloto/{pilotoId}/activos")
+    public List<TraspasoDTO> obtenerActivosPorPiloto(@PathVariable Integer pilotoId) {
+        return traspasoService.obtenerActivosPorPiloto(pilotoId);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TraspasoDTO> obtenerPorId(@PathVariable Integer id) {
         return traspasoService.obtenerPorId(id)
@@ -44,9 +49,39 @@ public class TraspasoController {
     }
 
     @PostMapping
-    public ResponseEntity<TraspasoDTO> crear(@RequestBody Traspaso traspaso) {
-        Traspaso saved = traspasoService.guardar(traspaso);
-        return ResponseEntity.status(HttpStatus.CREATED).body(traspasoService.toDTO(saved));
+    public ResponseEntity<?> crear(@RequestBody com.f1manager.backend.dto.TraspasoRequestDTO request) {
+        try {
+            TraspasoDTO savedDto = traspasoService.crearDesdeRequest(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedDto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al crear el traspaso");
+        }
+    }
+
+    @PostMapping("/{id}/aceptar")
+    public ResponseEntity<?> aceptarTraspaso(@PathVariable Integer id) {
+        try {
+            TraspasoDTO dto = traspasoService.aceptarTraspaso(id);
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al aceptar el traspaso");
+        }
+    }
+
+    @PostMapping("/{id}/rechazar")
+    public ResponseEntity<?> rechazarTraspaso(@PathVariable Integer id) {
+        try {
+            TraspasoDTO dto = traspasoService.rechazarTraspaso(id);
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al rechazar el traspaso");
+        }
     }
 
     @PutMapping("/{id}")
