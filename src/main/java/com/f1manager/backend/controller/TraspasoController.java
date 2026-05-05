@@ -1,11 +1,14 @@
 package com.f1manager.backend.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.f1manager.backend.dto.NegociacionRequestDTO;
+import com.f1manager.backend.dto.NegociacionResponseDTO;
 import com.f1manager.backend.dto.TraspasoDTO;
 import com.f1manager.backend.entity.Traspaso;
 import com.f1manager.backend.service.TraspasoService;
@@ -39,6 +42,11 @@ public class TraspasoController {
     @GetMapping("/piloto/{pilotoId}/activos")
     public List<TraspasoDTO> obtenerActivosPorPiloto(@PathVariable Integer pilotoId) {
         return traspasoService.obtenerActivosPorPiloto(pilotoId);
+    }
+
+    @GetMapping("/{partidaId}/bloqueados")
+    public Set<Integer> obtenerBloqueados(@PathVariable Integer partidaId) {
+        return traspasoService.obtenerPilotosBloqueados(partidaId);
     }
 
     @GetMapping("/{id}")
@@ -81,6 +89,18 @@ public class TraspasoController {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al rechazar el traspaso");
+        }
+    }
+
+    @PostMapping("/negociar")
+    public ResponseEntity<?> negociarTraspaso(@RequestBody NegociacionRequestDTO request) {
+        try {
+            NegociacionResponseDTO response = traspasoService.negociarTraspaso(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al procesar la negociación");
         }
     }
 

@@ -30,7 +30,7 @@ public class PilotoService {
     }
 
     public List<PilotoResumenDTO> obtenerPorPartida(Integer partidaId) {
-        return pilotoRepository.findByPartidaId(partidaId).stream()
+        return pilotoRepository.findByPartidaIdOrderByEstadisticaValoracionDesc(partidaId).stream()
                 .map(this::toPilotoResumenDTO)
                 .collect(Collectors.toList());
     }
