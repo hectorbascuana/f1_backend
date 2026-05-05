@@ -414,4 +414,11 @@ public class TraspasoService {
         dto.setImagen(escuderia.getImagen());
         return dto;
     }
+
+    public List<TraspasoDTO> obtenerAceptadasPorPartida(Integer partidaId) {
+        return traspasoRepository.findByPartidaIdAndAceptadaTrue(partidaId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
 }
+    

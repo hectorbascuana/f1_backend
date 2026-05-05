@@ -56,6 +56,14 @@ public class TraspasoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/aceptadas/{partidaId}")
+    public List<TraspasoDTO> obtenerAceptadasPorPartida(@PathVariable Integer partidaId) {
+        return traspasoService.obtenerAceptadasPorPartida(partidaId);
+    }
+
+
+    
+
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody com.f1manager.backend.dto.TraspasoRequestDTO request) {
         try {
