@@ -35,6 +35,12 @@ public class PilotoService {
                 .collect(Collectors.toList());
     }
 
+    public List<PilotoResumenDTO> obtenerClasificacion(Integer partidaId) {
+        return pilotoRepository.findByPartidaIdAndHaCorridoTrueOrderByPuntosDesc(partidaId).stream()
+                .map(this::toPilotoResumenDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<PilotoResumenDTO> obtenerPorEscuderia(Integer escuderiaId) {
         return pilotoRepository.findByEscuderiaId(escuderiaId).stream()
                 .map(this::toPilotoResumenDTO)
@@ -82,6 +88,7 @@ public class PilotoService {
         if (piloto.getEstadistica() != null) {
             dto.setEstadisticas(toEstadisticaDTO(piloto.getEstadistica()));
         }
+        dto.setHaCorrido(piloto.getHaCorrido());
         return dto;
     }
 
@@ -113,7 +120,7 @@ public class PilotoService {
         dto.setImagen(piloto.getImagen());
         dto.setPuntos(piloto.getPuntos());
         dto.setValor(piloto.getValor() != null ? piloto.getValor().toPlainString() : null);
-
+        dto.setHaCorrido(piloto.getHaCorrido());
 
         return dto;
     }

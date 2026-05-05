@@ -50,6 +50,7 @@ CREATE TABLE escuderia (
     nombre VARCHAR(100) NOT NULL,
     imagen VARCHAR(255),
     presupuesto DECIMAL(15, 2) DEFAULT 0.00,
+    puntos INT DEFAULT 0,
     id_piloto_1 INT NULL,
     id_piloto_2 INT NULL,
     aerodinamica INT DEFAULT 1 CHECK (aerodinamica BETWEEN 1 AND 99),
@@ -73,6 +74,7 @@ CREATE TABLE piloto (
     puntos INT DEFAULT 0,
     valor DECIMAL(15, 2),
     estadistica_id INT,
+    ha_corrido BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (partida_id) REFERENCES partida (id) ON DELETE CASCADE,
     FOREIGN KEY (escuderia_id) REFERENCES escuderia (id) ON DELETE SET NULL,
     FOREIGN KEY (estadistica_id) REFERENCES estadistica (id) ON DELETE CASCADE

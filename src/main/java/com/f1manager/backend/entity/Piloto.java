@@ -47,7 +47,7 @@ public class Piloto {
     private Integer edad;
 
     @Column(name = "puntos")
-    private Integer puntos;
+    private Integer puntos = 0;
 
     @Column(name = "valor", precision = 15, scale = 2)
     private BigDecimal valor;
@@ -60,6 +60,9 @@ public class Piloto {
     @OneToOne
     @JoinColumn(name = "estadistica_id", referencedColumnName = "id")
     private Estadistica estadistica;
+
+    @Column(name = "ha_corrido", nullable = false)
+    private Boolean haCorrido = false;
 
     @OneToMany(mappedBy = "piloto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PilotoCircuito> pilotoCircuitos;

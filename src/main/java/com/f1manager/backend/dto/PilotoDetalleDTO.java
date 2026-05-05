@@ -11,4 +11,6 @@ public class PilotoDetalleDTO {
     private String imagen;
     private Integer puntos;
     private String valor;
+    @com.fasterxml.jackson.annotation.JsonProperty("ha_corrido")
+    private Boolean haCorrido;
 }

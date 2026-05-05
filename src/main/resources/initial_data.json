@@ -24,7 +24,7 @@
     { "id": 22, "valoracion": 84, "curva_rapida": 88, "curva_lenta": 82, "salidas": 80, "consistencia": 88 }
   ],
   "escuderias": [
-    { "id": 1, "nombre": "Oracle Red Bull Racing", "imagen": "assets/images/teams/red-bull.jpg", "presupuesto": 145.00, "aerodinamica": 76, "motor": 72, "durabilidad": 12, "tunel_viento": 3, "banco_pruebas": 2, "escuela_pilotos": 3, "id_piloto_1": 1, "id_piloto_2": 2 },
+    { "id": 1, "nombre": "Oracle Red Bull Racing", "imagen": "assets/images/teams/red-bull.png", "presupuesto": 145.00, "aerodinamica": 76, "motor": 72, "durabilidad": 12, "tunel_viento": 3, "banco_pruebas": 2, "escuela_pilotos": 3, "id_piloto_1": 1, "id_piloto_2": 2 },
     { "id": 2, "nombre": "Mercedes-AMG PETRONAS", "imagen": "assets/images/teams/mercedes.png", "presupuesto": 140.00, "aerodinamica": 72, "motor": 78, "durabilidad": 16, "tunel_viento": 2, "banco_pruebas": 3, "escuela_pilotos": 2, "id_piloto_1": 3, "id_piloto_2": 4 },
     { "id": 3, "nombre": "Scuderia Ferrari HP", "imagen": "assets/images/teams/ferrari.png", "presupuesto": 142.00, "aerodinamica": 74, "motor": 79, "durabilidad": 14, "tunel_viento": 3, "banco_pruebas": 3, "escuela_pilotos": 3, "id_piloto_1": 5, "id_piloto_2": 6 },
     { "id": 4, "nombre": "McLaren Formula 1", "imagen": "assets/images/teams/mclaren.png", "presupuesto": 135.00, "aerodinamica": 80, "motor": 77, "durabilidad": 17, "tunel_viento": 3, "banco_pruebas": 2, "escuela_pilotos": 2, "id_piloto_1": 7, "id_piloto_2": 8 },

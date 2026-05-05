@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface EscuderiaRepository extends JpaRepository<Escuderia, Integer> {
     List<Escuderia> findByPartidaId(Integer partidaId);
+    List<Escuderia> findByPartidaIdOrderByPuntosDesc(Integer partidaId);
 }
+

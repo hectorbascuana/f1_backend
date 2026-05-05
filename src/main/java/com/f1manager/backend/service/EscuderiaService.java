@@ -45,6 +45,12 @@ public class EscuderiaService {
                 .collect(Collectors.toList());
     }
 
+    public List<EscuderiaDTO> obtenerClasificacion(Integer partidaId) {
+        return escuderiaRepository.findByPartidaIdOrderByPuntosDesc(partidaId).stream()
+                .map(this::toEscuderiaDTO)
+                .collect(Collectors.toList());
+    }
+
     public Optional<EscuderiaDTO> obtenerPorId(Integer id) {
         return escuderiaRepository.findById(id)
                 .map(this::toEscuderiaDTO);
@@ -150,6 +156,7 @@ public class EscuderiaService {
         dto.setTunelVientoCosto(costeMejoraInstalacion(escuderia.getTunelViento()));
         dto.setBancoPruebasCosto(costeMejoraInstalacion(escuderia.getBancoPruebas()));
         dto.setEscuelaPilotosCosto(costeMejoraEscuela(escuderia.getEscuelaPilotos()));
+        dto.setPuntos(escuderia.getPuntos());
         
         if (escuderia.getPiloto1() != null) {
             dto.setPiloto1(pilotoService.toPilotoResumenDTO(escuderia.getPiloto1()));

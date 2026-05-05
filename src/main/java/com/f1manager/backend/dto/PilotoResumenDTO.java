@@ -15,4 +15,7 @@ public class PilotoResumenDTO {
     private EscuderiaMinDTO escuderia;
     private EstadisticaDTO estadisticas;
     private Integer asiento;
+    
+    @com.fasterxml.jackson.annotation.JsonProperty("ha_corrido")
+    private Boolean haCorrido;
 }

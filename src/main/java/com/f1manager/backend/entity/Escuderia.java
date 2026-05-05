@@ -36,6 +36,9 @@ public class Escuderia {
     @Column(name = "presupuesto", precision = 15, scale = 2)
     private BigDecimal presupuesto;
 
+    @Column(name = "puntos")
+    private Integer puntos = 0;
+
     @Min(1)
     @Max(100)
     @Column(name = "aerodinamica")
