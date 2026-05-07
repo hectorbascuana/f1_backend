@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "partida")
@@ -34,6 +36,25 @@ public class Partida {
     @Column(name = "anio")
     private Integer anio;
 
+    @OneToMany(mappedBy = "partida", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Escuderia> escuderias;
+
+    @OneToMany(mappedBy = "partida", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Piloto> pilotos;
+
+    @OneToMany(mappedBy = "partida", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Estadistica> estadisticas;
+
+    @OneToMany(mappedBy = "partida", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Traspaso> traspasos;
+
+    @OneToMany(mappedBy = "partida", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<PilotoCircuito> pilotoCircuitos;
 
     @PrePersist
     protected void onCreate() {

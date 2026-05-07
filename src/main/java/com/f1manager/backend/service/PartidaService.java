@@ -15,6 +15,7 @@ import com.f1manager.backend.dto.PartidaDTO;
 import com.f1manager.backend.dto.PartidaDTO.EscuderiaSeleccionadaDTO;
 import com.f1manager.backend.dto.CircuitoDTO;
 import com.f1manager.backend.entity.Circuito;
+import com.f1manager.backend.repository.PilotoCircuitoRepository;
 import com.f1manager.backend.service.TraspasoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -37,6 +38,9 @@ public class PartidaService {
 
     @Autowired
     private TraspasoService traspasoService;
+
+    @Autowired
+    private PilotoCircuitoRepository pilotoCircuitoRepository;
 
     public List<PartidaDTO> obtenerTodas() {
         return partidaRepository.findAll().stream()
@@ -231,8 +235,23 @@ public class PartidaService {
 
     @Transactional
     public void eliminarPartida(Integer partidaId) {
-        if(partidaRepository.existsById(partidaId)) {
-            partidaRepository.deleteById(partidaId);
+        Partida p = partidaRepository.findById(partidaId).orElse(null);
+        if(p != null) {
+            // 1. Desvincular para evitar FK circular (Partida -> Escuderia -> Partida)
+            p.setEscuderiaSeleccionada(null);
+            partidaRepository.saveAndFlush(p);
+            
+            // 2. Limpiar colecciones explícitamente para forzar el borrado de hijos en orden
+            // Especialmente piloto_circuito que depende de piloto y partida
+            p.getPilotoCircuitos().clear();
+            p.getTraspasos().clear();
+            p.getPilotos().forEach(pil -> pil.getPilotoCircuitos().clear());
+            p.getPilotos().clear();
+            p.getEscuderias().clear();
+            p.getEstadisticas().clear();
+            
+            partidaRepository.saveAndFlush(p);
+            partidaRepository.delete(p);
         } else {
             throw new RuntimeException("La partida no existe");
         }
