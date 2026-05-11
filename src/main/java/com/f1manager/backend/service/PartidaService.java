@@ -236,22 +236,14 @@ public class PartidaService {
     @Transactional
     public void eliminarPartida(Integer partidaId) {
         Partida p = partidaRepository.findById(partidaId).orElse(null);
-        if(p != null) {
-            // 1. Desvincular para evitar FK circular (Partida -> Escuderia -> Partida)
+        if (p != null) {
+            // 1. Desvincular la escudería seleccionada para evitar bloqueos por FK circular
             p.setEscuderiaSeleccionada(null);
             partidaRepository.saveAndFlush(p);
             
-            // 2. Limpiar colecciones explícitamente para forzar el borrado de hijos en orden
-            // Especialmente piloto_circuito que depende de piloto y partida
-            p.getPilotoCircuitos().clear();
-            p.getTraspasos().clear();
-            p.getPilotos().forEach(pil -> pil.getPilotoCircuitos().clear());
-            p.getPilotos().clear();
-            p.getEscuderias().clear();
-            p.getEstadisticas().clear();
-            
-            partidaRepository.saveAndFlush(p);
-            partidaRepository.delete(p);
+            // 2. Usar borrado nativo para que el ON DELETE CASCADE de la DB haga el trabajo sucio
+            // Esto evita que Hibernate intente hacer UPDATES (que fallan por NOT NULL) antes de borrar
+            partidaRepository.deletePartidaById(partidaId);
         } else {
             throw new RuntimeException("La partida no existe");
         }

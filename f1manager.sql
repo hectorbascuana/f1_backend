@@ -97,7 +97,7 @@ CREATE TABLE piloto_circuito (
     ),
     FOREIGN KEY (partida_id) REFERENCES partida (id) ON DELETE CASCADE,
     FOREIGN KEY (circuito_id) REFERENCES circuito (id),
-    FOREIGN KEY (piloto_id) REFERENCES piloto (id)
+    FOREIGN KEY (piloto_id) REFERENCES piloto (id) ON DELETE CASCADE
 ) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 7 Tabla de transpasos

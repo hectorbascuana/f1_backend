@@ -37,6 +37,16 @@ public class PartidaController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<PartidaDTO> obtenerPorId(@PathVariable Integer id) {
+        try {
+            Partida p = partidaService.obtenerPorId(id);
+            return ResponseEntity.ok(partidaService.toPartidaDTO(p));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarPartida(@PathVariable Integer id) {
         try {
