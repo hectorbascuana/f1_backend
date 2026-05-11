@@ -3,6 +3,7 @@ package com.f1manager.backend.controller;
 import com.f1manager.backend.entity.PilotoCircuito;
 import com.f1manager.backend.entity.PilotoCircuitoId;
 import com.f1manager.backend.service.PilotoCircuitoService;
+import com.f1manager.backend.dto.ResultadoCarreraDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,5 +42,13 @@ public class PilotoCircuitoController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/resultado/{partidaId}/{temporada}/{circuitoId}")
+    public ResponseEntity<List<ResultadoCarreraDTO>> obtenerResultadoCarrera(
+            @PathVariable Integer partidaId,
+            @PathVariable Integer temporada,
+            @PathVariable Integer circuitoId) {
+        return ResponseEntity.ok(pilotoCircuitoService.obtenerResultadoCarrera(partidaId, temporada, circuitoId));
     }
 }
