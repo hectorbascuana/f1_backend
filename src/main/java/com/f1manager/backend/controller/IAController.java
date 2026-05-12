@@ -49,21 +49,25 @@ public class IAController {
         } else {
             response.put("completado", resultado.isCompletado());
             response.put("numDecisiones", resultado.getDecisiones().size());
+            // Si está completado, incluimos la lista de decisiones para el HUD de depuración
+            if (resultado.isCompletado()) {
+                response.put("decisiones", resultado.getDecisiones());
+            }
         }
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/logs")
-    public ResponseEntity<String> verLogs() {
+    @GetMapping("/errores")
+    public ResponseEntity<String> verErrores() {
         try {
             Path path = Paths.get("debug_carrera.log");
             if (!Files.exists(path)) {
-                return ResponseEntity.ok("El archivo debug_carrera.log no existe aún en " + path.toAbsolutePath());
+                return ResponseEntity.ok("No hay registro de errores aún.");
             }
             String content = Files.readString(path);
             return ResponseEntity.ok(content);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al leer los logs: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al leer los errores: " + e.getMessage());
         }
     }
 }
