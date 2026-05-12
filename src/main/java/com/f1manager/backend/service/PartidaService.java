@@ -42,6 +42,10 @@ public class PartidaService {
     @Autowired
     private PilotoCircuitoRepository pilotoCircuitoRepository;
 
+    @Autowired
+    @org.springframework.context.annotation.Lazy
+    private IAService iaService;
+
     public List<PartidaDTO> obtenerTodas() {
         return partidaRepository.findAll().stream()
                 .map(this::toPartidaDTO)
@@ -274,7 +278,10 @@ public class PartidaService {
             }
         }
 
-        // 2. Avanzar al siguiente circuito o año
+        // 2. Aplicar decisiones de la IA (calculadas durante la carrera)
+        iaService.aplicarDecisiones(id);
+
+        // 3. Avanzar al siguiente circuito o año
         if (carreraIdActual == 24) {
             p.setProximoCircuito(
                     circuitoRepository.findById(1).orElseThrow(() -> new RuntimeException("Circuito 1 no encontrado")));

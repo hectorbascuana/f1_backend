@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
 
 /**
  * CEREBRO del motor de carrera.
@@ -31,9 +34,10 @@ public class CarreraMotorService {
     private static final Logger log = LoggerFactory.getLogger(CarreraMotorService.class);
 
     /** Map de carreras activas. Se elimina la entrada al finalizar (cleanup). */
-    private final ConcurrentHashMap<UUID, EstadoCarrera> carrerasActivas = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, EstadoCarrera> carrerasActivas = new ConcurrentHashMap<>();
 
     private final CarreraDataService carreraDataService;
+    private final IAService iaService;
 
     /**
      * Constante de desgaste: a 100% desgaste, penalización máxima de 5000ms (+5s)
@@ -49,8 +53,20 @@ public class CarreraMotorService {
     /** Random thread-safe para la simulación */
     private final Random random = new Random();
 
-    public CarreraMotorService(CarreraDataService carreraDataService) {
+    public CarreraMotorService(CarreraDataService carreraDataService, IAService iaService) {
+        log.info("[CarreraMotorService] Constructor llamado. Mapa estático contiene {} carreras.", carrerasActivas.size());
+        logToFile("[SYSTEM] CarreraMotorService instanciado. Carreras en mapa: " + carrerasActivas.size());
         this.carreraDataService = carreraDataService;
+        this.iaService = iaService;
+    }
+
+    private void logToFile(String message) {
+        try (FileWriter fw = new FileWriter("debug_carrera.log", true);
+             PrintWriter pw = new PrintWriter(fw)) {
+            pw.println(LocalDateTime.now() + " " + message);
+        } catch (Exception e) {
+            log.error("Error escribiendo en debug_carrera.log: {}", e.getMessage());
+        }
     }
 
     // =========================================================================
@@ -64,6 +80,7 @@ public class CarreraMotorService {
      * @return DTO con UUID, circuito y parrilla de salida
      */
     public CarreraStartResponseDTO iniciarCarrera(Integer partidaId) {
+        logToFile("[REQUEST_START] Partida=" + partidaId);
         // 1. Cargar datos de BD → POJOs volátiles
         EstadoCarrera estado = carreraDataService.cargarDatosCarrera(partidaId);
 
@@ -72,11 +89,21 @@ public class CarreraMotorService {
 
         // 3. Registrar en el Map de carreras activas
         carrerasActivas.put(estado.getUuid(), estado);
+        log.info("[CarreraMotorService] Carrera registrada en el mapa: UUID={}. Total activas: {}", 
+                estado.getUuid(), carrerasActivas.size());
+        logToFile("[START] UUID=" + estado.getUuid() + " | Partida=" + partidaId + " | Circuito=" + estado.getCircuitoNombre());
 
         log.info("Carrera iniciada (Clasificación completada): UUID={}, Circuito={}",
                 estado.getUuid(), estado.getCircuitoNombre());
 
-        // 4. Construir respuesta (la parrilla ya está calculada)
+        // 4. Disparar procesamiento IA en hilo separado
+        try {
+            iaService.procesarDecisionesIA(partidaId);
+        } catch (Exception e) {
+            log.error("Error al iniciar el procesamiento de la IA: {}", e.getMessage());
+        }
+
+        // 5. Construir respuesta (la parrilla ya está calculada)
         return construirStartResponse(estado);
     }
 
@@ -173,6 +200,9 @@ public class CarreraMotorService {
             boolean pitStopPiloto2, TipoNeumatico compuestoPiloto2) {
         EstadoCarrera estado = carrerasActivas.get(uuid);
         if (estado == null) {
+            String errorMsg = "[ERROR] Carrera " + uuid + " no encontrada. Activas: " + carrerasActivas.keySet();
+            log.error("[CarreraMotorService] " + errorMsg);
+            logToFile(errorMsg);
             throw new RuntimeException("Carrera no encontrada: " + uuid);
         }
         if (estado.isFinalizada()) {
@@ -261,7 +291,7 @@ public class CarreraMotorService {
 
             // Cleanup: liberar RAM
             carrerasActivas.remove(uuid);
-
+            logToFile("[FINISH] UUID=" + uuid + " | Carrera finalizada y eliminada del mapa.");
             log.info("Carrera finalizada y persistida: UUID={}", uuid);
         }
 

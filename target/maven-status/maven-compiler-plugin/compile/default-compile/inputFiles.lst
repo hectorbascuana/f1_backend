@@ -5,6 +5,7 @@
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/controller/ClasificacionController.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/controller/EscuderiaController.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/controller/EstadisticaController.java
+/home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/controller/IAController.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/controller/PartidaController.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/controller/PilotoCircuitoController.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/controller/PilotoController.java
@@ -29,6 +30,7 @@
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/dto/PilotoDetalleDTO.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/dto/PilotoMinDTO.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/dto/PilotoResumenDTO.java
+/home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/dto/ResultadoCarreraDTO.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/dto/TraspasoDTO.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/dto/TraspasoRequestDTO.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/entity/Circuito.java
@@ -39,6 +41,8 @@
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/entity/PilotoCircuito.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/entity/PilotoCircuitoId.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/entity/Traspaso.java
+/home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/model/ia/IADecision.java
+/home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/model/ia/IAResultadoPartida.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/model/simulation/EstadoCarrera.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/model/simulation/PerfilIA.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/model/simulation/PilotoSimulacion.java
@@ -55,6 +59,7 @@
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/service/CircuitoService.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/service/EscuderiaService.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/service/EstadisticaService.java
+/home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/service/IAService.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/service/PartidaService.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/service/PilotoCircuitoService.java
 /home/hector/Escritorio/F1_Manager/backend/src/main/java/com/f1manager/backend/service/PilotoService.java
