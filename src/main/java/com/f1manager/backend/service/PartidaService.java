@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.f1manager.backend.entity.Partida;
 import com.f1manager.backend.entity.Escuderia;
 import com.f1manager.backend.entity.Piloto;
+import com.f1manager.backend.entity.PilotoCircuito;
 import com.f1manager.backend.entity.Estadistica;
 import com.f1manager.backend.repository.PartidaRepository;
 import com.f1manager.backend.repository.EscuderiaRepository;
@@ -16,7 +17,6 @@ import com.f1manager.backend.dto.PartidaDTO.EscuderiaSeleccionadaDTO;
 import com.f1manager.backend.dto.CircuitoDTO;
 import com.f1manager.backend.entity.Circuito;
 import com.f1manager.backend.repository.PilotoCircuitoRepository;
-import com.f1manager.backend.service.TraspasoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -65,8 +65,10 @@ public class PartidaService {
         PartidaDTO dto = new PartidaDTO();
         dto.setId(partida.getId());
         dto.setNombre(partida.getNombre());
-        dto.setEscuderiaSeleccionada(partida.getEscuderiaSeleccionada() != null ? toEscuderiaSeleccionadaDTO(partida.getEscuderiaSeleccionada()) : null);
-        
+        dto.setEscuderiaSeleccionada(partida.getEscuderiaSeleccionada() != null
+                ? toEscuderiaSeleccionadaDTO(partida.getEscuderiaSeleccionada())
+                : null);
+
         if (partida.getProximoCircuito() != null) {
             Circuito c = partida.getProximoCircuito();
             CircuitoDTO cDto = new CircuitoDTO();
@@ -79,7 +81,7 @@ public class PartidaService {
             cDto.setMotorReq(c.getMotorReq());
             dto.setProximoCircuito(cDto.getId());
         }
-        
+
         dto.setFechaCreacion(partida.getFechaCreacion());
         dto.setAnio(partida.getAnio());
 
@@ -177,7 +179,8 @@ public class PartidaService {
             partidaGuardada.setEscuderiaSeleccionada(escuderiaSeleccionada);
             partidaRepository.save(partidaGuardada);
         } else {
-            throw new RuntimeException("La escudería con ID '" + idEscuderiaJson + "' no existe en los datos iniciales.");
+            throw new RuntimeException(
+                    "La escudería con ID '" + idEscuderiaJson + "' no existe en los datos iniciales.");
         }
 
         // Parse Pilotos
@@ -193,7 +196,7 @@ public class PartidaService {
                 p.setEdad(node.path("edad").asInt());
                 p.setPuntos(node.path("puntos").asInt());
                 p.setValor(BigDecimal.valueOf(node.path("valor").asDouble()));
-                
+
                 if (node.has("escuderia_id")) {
                     p.setEscuderia(mapEscuderias.get(node.get("escuderia_id").asInt()));
                 }
@@ -240,9 +243,11 @@ public class PartidaService {
             // 1. Desvincular la escudería seleccionada para evitar bloqueos por FK circular
             p.setEscuderiaSeleccionada(null);
             partidaRepository.saveAndFlush(p);
-            
-            // 2. Usar borrado nativo para que el ON DELETE CASCADE de la DB haga el trabajo sucio
-            // Esto evita que Hibernate intente hacer UPDATES (que fallan por NOT NULL) antes de borrar
+
+            // 2. Usar borrado nativo para que el ON DELETE CASCADE de la DB haga el trabajo
+            // sucio
+            // Esto evita que Hibernate intente hacer UPDATES (que fallan por NOT NULL)
+            // antes de borrar
             partidaRepository.deletePartidaById(partidaId);
         } else {
             throw new RuntimeException("La partida no existe");
@@ -253,17 +258,71 @@ public class PartidaService {
     public Partida avanzarCarrera(Integer id) {
         Partida p = obtenerPorId(id);
         int carreraIdActual = p.getProximoCircuito().getId();
-        
-        if (carreraIdActual == 24) {
-            p.setProximoCircuito(circuitoRepository.findById(1).orElseThrow(() -> new RuntimeException("Circuito 1 no encontrado")));
-            p.setAnio(p.getAnio() + 1);
-        } else {
-            p.setProximoCircuito(circuitoRepository.findById(carreraIdActual + 1).orElseThrow(() -> new RuntimeException("Siguiente circuito no encontrado")));
+        int anioActual = p.getAnio();
+
+        // 1. Repartir premios económicos basados en los resultados de la carrera que
+        // acaba de terminar
+        List<PilotoCircuito> resultados = pilotoCircuitoRepository
+                .findByPartidaYearAndCircuitCustomOrder(id, anioActual, carreraIdActual);
+
+        for (PilotoCircuito rc : resultados) {
+            if (rc.getPiloto() != null && rc.getPiloto().getEscuderia() != null) {
+                Escuderia esc = rc.getPiloto().getEscuderia();
+                BigDecimal premio = calcularPremio(rc.getPosicion());
+                esc.setPresupuesto(esc.getPresupuesto().add(premio));
+                escuderiaRepository.save(esc);
+            }
         }
+
+        // 2. Avanzar al siguiente circuito o año
+        if (carreraIdActual == 24) {
+            p.setProximoCircuito(
+                    circuitoRepository.findById(1).orElseThrow(() -> new RuntimeException("Circuito 1 no encontrado")));
+            p.setAnio(anioActual + 1);
+        } else {
+            p.setProximoCircuito(circuitoRepository.findById(carreraIdActual + 1)
+                    .orElseThrow(() -> new RuntimeException("Siguiente circuito no encontrado")));
+        }
+
         // Liberar bloqueos de negociaciones para esta partida al avanzar de carrera
         traspasoService.limpiarBloqueos(id);
-        
+
         return partidaRepository.save(p);
+    }
+
+    /**
+     * Calcula el premio económico basado en la posición final.
+     * Escala equilibrada: 12M al primero, bajando hasta 0.2M al DNF.
+     */
+    private BigDecimal calcularPremio(Integer posicion) {
+        if (posicion == null)
+            return BigDecimal.valueOf(0.2); // DNF o sin posición
+
+        return switch (posicion) {
+            case 1 -> BigDecimal.valueOf(12.0);
+            case 2 -> BigDecimal.valueOf(10.0);
+            case 3 -> BigDecimal.valueOf(8.5);
+            case 4 -> BigDecimal.valueOf(7.0);
+            case 5 -> BigDecimal.valueOf(6.0);
+            case 6 -> BigDecimal.valueOf(5.0);
+            case 7 -> BigDecimal.valueOf(4.0);
+            case 8 -> BigDecimal.valueOf(3.5);
+            case 9 -> BigDecimal.valueOf(3.0);
+            case 10 -> BigDecimal.valueOf(2.5);
+            case 11 -> BigDecimal.valueOf(2.0);
+            case 12 -> BigDecimal.valueOf(1.8);
+            case 13 -> BigDecimal.valueOf(1.6);
+            case 14 -> BigDecimal.valueOf(1.4);
+            case 15 -> BigDecimal.valueOf(1.2);
+            case 16 -> BigDecimal.valueOf(1.0);
+            case 17 -> BigDecimal.valueOf(0.9);
+            case 18 -> BigDecimal.valueOf(0.8);
+            case 19 -> BigDecimal.valueOf(0.7);
+            case 20 -> BigDecimal.valueOf(0.6);
+            case 21 -> BigDecimal.valueOf(0.5);
+            case 22 -> BigDecimal.valueOf(0.4);
+            default -> BigDecimal.valueOf(0.2);
+        };
     }
 
     public void guardar(Partida p) {
@@ -271,9 +330,15 @@ public class PartidaService {
     }
 
     private void generarPilotosReserva(Partida partida, Map<Integer, Escuderia> mapEscuderias) {
-        String[] nombres = {"Lucas", "Mateo", "Liam", "Noah", "Leo", "Oliver", "Arthur", "Finn", "Hugo", "Arno", "Santi", "Pau", "Marc", "Erik", "Lars", "Timo", "Jan", "Klaus", "Ben", "Dan", "Iker", "Theo", "Jonas", "Felipe", "Alex"};
-        String[] apellidos = {"Silva", "Müller", "Rossi", "García", "Smith", "Lefebvre", "Ivanov", "Sato", "Khan", "O'Connor", "Junior", "Santos", "Costa", "Popescu", "Varga", "Sørensen", "Bakker", "Novák", "Petrov", "Larsen", "Schmidt", "Dubois", "Moretti", "Vidal", "Becker"};
-        String[] paises = {"Portugal", "Alemania", "Italia", "España", "Reino Unido", "Francia", "Rusia", "Japón", "India", "Irlanda", "Brasil", "Rumanía", "Hungría", "Dinamarca", "Países Bajos", "Chequia", "Noruega", "Argentina", "México", "EE. UU.", "Canadá", "Australia"};
+        String[] nombres = { "Lucas", "Mateo", "Liam", "Noah", "Leo", "Oliver", "Arthur", "Finn", "Hugo", "Arno",
+                "Santi", "Pau", "Marc", "Erik", "Lars", "Timo", "Jan", "Klaus", "Ben", "Dan", "Iker", "Theo", "Jonas",
+                "Felipe", "Alex" };
+        String[] apellidos = { "Silva", "Müller", "Rossi", "García", "Smith", "Lefebvre", "Ivanov", "Sato", "Khan",
+                "O'Connor", "Junior", "Santos", "Costa", "Popescu", "Varga", "Sørensen", "Bakker", "Novák", "Petrov",
+                "Larsen", "Schmidt", "Dubois", "Moretti", "Vidal", "Becker" };
+        String[] paises = { "Portugal", "Alemania", "Italia", "España", "Reino Unido", "Francia", "Rusia", "Japón",
+                "India", "Irlanda", "Brasil", "Rumanía", "Hungría", "Dinamarca", "Países Bajos", "Chequia", "Noruega",
+                "Argentina", "México", "EE. UU.", "Canadá", "Australia" };
 
         Random random = new Random();
 
@@ -281,21 +346,22 @@ public class PartidaService {
             // Create Estadistica for the reserve
             Estadistica est = new Estadistica();
             est.setPartida(partida);
-            
+
             // Stats range 60-75
-            int valoracion = 60 + random.nextInt(16); 
+            int valoracion = 60 + random.nextInt(16);
             est.setValoracion(valoracion);
             est.setCurvaRapida(55 + random.nextInt(valoracion - 50));
             est.setCurvaLenta(55 + random.nextInt(valoracion - 50));
             est.setSalidas(50 + random.nextInt(valoracion - 45));
             est.setConsistencia(45 + random.nextInt(valoracion - 40));
-            
+
             est = estadisticaRepository.save(est);
 
             // Create Piloto
             Piloto p = new Piloto();
             p.setPartida(partida);
-            String nombreCompleto = nombres[random.nextInt(nombres.length)] + " " + apellidos[random.nextInt(apellidos.length)];
+            String nombreCompleto = nombres[random.nextInt(nombres.length)] + " "
+                    + apellidos[random.nextInt(apellidos.length)];
             p.setNombre(nombreCompleto);
             p.setPais(paises[random.nextInt(paises.length)]);
             p.setImagen("assets/drivers/generic_reserve.png");
