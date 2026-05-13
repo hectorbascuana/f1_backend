@@ -36,6 +36,7 @@ CREATE TABLE estadistica (
     id INT AUTO_INCREMENT PRIMARY KEY,
     partida_id INT NOT NULL,
     valoracion INT CHECK (valoracion BETWEEN 1 AND 99),
+    valoracion_inicial INT,
     curva_rapida INT CHECK (curva_rapida BETWEEN 1 AND 99),
     curva_lenta INT CHECK (curva_lenta BETWEEN 1 AND 99),
     salidas INT CHECK (salidas BETWEEN 1 AND 99),

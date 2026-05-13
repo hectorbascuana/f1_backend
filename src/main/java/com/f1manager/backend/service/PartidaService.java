@@ -46,6 +46,9 @@ public class PartidaService {
     @org.springframework.context.annotation.Lazy
     private IAService iaService;
 
+    @Autowired
+    private ProgresoService progresoService;
+
     public List<PartidaDTO> obtenerTodas() {
         return partidaRepository.findAll().stream()
                 .map(this::toPartidaDTO)
@@ -136,6 +139,7 @@ public class PartidaService {
                 est.setCurvaLenta(node.path("curva_lenta").asInt());
                 est.setSalidas(node.path("salidas").asInt());
                 est.setConsistencia(node.path("consistencia").asInt());
+                est.setValoracionInicial(est.getValoracion());
                 est = estadisticaRepository.save(est);
                 mapEstadisticas.put(node.path("id").asInt(), est);
             }
@@ -281,11 +285,23 @@ public class PartidaService {
         // 2. Aplicar decisiones de la IA (calculadas durante la carrera)
         iaService.aplicarDecisiones(id);
 
-        // 3. Avanzar al siguiente circuito o año
+        // 3. Evolución de pilotos (mejoras y declive por edad)
+        progresoService.procesarEvolucionPilotos(p);
+
+        // 4. Avanzar al siguiente circuito o año
         if (carreraIdActual == 24) {
             p.setProximoCircuito(
                     circuitoRepository.findById(1).orElseThrow(() -> new RuntimeException("Circuito 1 no encontrado")));
             p.setAnio(anioActual + 1);
+            
+            // Al cambiar de año, actualizamos la valoración inicial de todos los pilotos de la partida
+            List<Piloto> todosLosPilotos = pilotoRepository.findByPartidaId(id);
+            for (Piloto pil : todosLosPilotos) {
+                if (pil.getEstadistica() != null) {
+                    pil.getEstadistica().setValoracionInicial(pil.getEstadistica().getValoracion());
+                    // No hace falta guardarlo explícitamente si usamos transacciones, pero por seguridad:
+                }
+            }
         } else {
             p.setProximoCircuito(circuitoRepository.findById(carreraIdActual + 1)
                     .orElseThrow(() -> new RuntimeException("Siguiente circuito no encontrado")));
@@ -361,6 +377,7 @@ public class PartidaService {
             est.setCurvaLenta(55 + random.nextInt(valoracion - 50));
             est.setSalidas(50 + random.nextInt(valoracion - 45));
             est.setConsistencia(45 + random.nextInt(valoracion - 40));
+            est.setValoracionInicial(est.getValoracion());
 
             est = estadisticaRepository.save(est);
 

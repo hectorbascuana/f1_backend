@@ -10,4 +10,5 @@ public class EstadisticaDTO {
     private Integer curvaLenta;
     private Integer salidas;
     private Integer consistencia;
+    private Integer progresoTemporada;
 }

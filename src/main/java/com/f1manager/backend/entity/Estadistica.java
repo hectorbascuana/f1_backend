@@ -27,6 +27,9 @@ public class Estadistica {
     @Column(name = "valoracion")
     private Integer valoracion;
 
+    @Column(name = "valoracion_inicial")
+    private Integer valoracionInicial;
+
     @Min(1)
     @Max(99)
     @Column(name = "curva_rapida")

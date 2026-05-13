@@ -18,6 +18,7 @@ import com.f1manager.backend.dto.PilotoDetalleDTO;
 import com.f1manager.backend.dto.PilotoResumenDTO;
 import com.f1manager.backend.entity.Piloto;
 import com.f1manager.backend.service.PilotoService;
+import com.f1manager.backend.service.ProgresoService;
 
 @RestController
 @RequestMapping("/api/pilotos")
@@ -25,9 +26,11 @@ import com.f1manager.backend.service.PilotoService;
 public class PilotoController {
     
     private final PilotoService pilotoService;
+    private final ProgresoService progresoService;
     
-    public PilotoController(PilotoService pilotoService) {
+    public PilotoController(PilotoService pilotoService, ProgresoService progresoService) {
         this.pilotoService = pilotoService;
+        this.progresoService = progresoService;
     }
     
     @GetMapping("/partida/{partidaId}")
@@ -78,5 +81,10 @@ public class PilotoController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/evolucion/{partidaId}")
+    public ResponseEntity<List<ProgresoService.EvolucionReport>> obtenerEvolucion(@PathVariable Integer partidaId) {
+        return ResponseEntity.ok(progresoService.obtenerReporte(partidaId));
     }
 }

@@ -100,6 +100,14 @@ public class PilotoService {
         dto.setCurvaLenta(estadistica.getCurvaLenta());
         dto.setSalidas(estadistica.getSalidas());
         dto.setConsistencia(estadistica.getConsistencia());
+        
+        // Calcular progreso de la temporada (Diferencia entre valoración actual e inicial)
+        if (estadistica.getValoracionInicial() != null) {
+            dto.setProgresoTemporada(estadistica.getValoracion() - estadistica.getValoracionInicial());
+        } else {
+            dto.setProgresoTemporada(0);
+        }
+        
         return dto;
     }
 

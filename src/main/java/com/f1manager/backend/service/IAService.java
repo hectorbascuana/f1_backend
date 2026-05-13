@@ -182,10 +182,16 @@ public class IAService {
             }
 
             // PRIORIDAD 2: ¿Mejorar coche o fichar?
-            int puntajeCoche = deficitAero + deficitMotor + deficitDura;
-            int puntajePilotos = deficitPilotos * 3; // Ponderar para equiparar escala
+            // Usamos el déficit máximo (la parte que más urge) en lugar de la suma
+            int peorDeficitCoche = Math.max(deficitAero, deficitMotor);
+            double puntajeCoche = peorDeficitCoche * 2.5; // Prioridad base al coche
+            double puntajePilotos = deficitPilotos * 2.0;
 
-            if (puntajeCoche >= puntajePilotos) {
+            // Añadir factor de incertidumbre (ruido aleatorio de ±20%) 
+            // para que no siempre tomen la misma decisión en la misma situación
+            double ruido = 0.8 + random.nextDouble() * 0.4;
+
+            if (puntajeCoche * ruido >= puntajePilotos) {
                 // Intentar mejorar la parte más débil del coche
                 EscuderiaMejoraTipo mejora = elegirMejoraCoche(esc, deficitAero, deficitMotor, deficitDura);
                 float costeMejora = obtenerCosteMejora(esc, mejora);
@@ -291,11 +297,14 @@ public class IAService {
         int peorTitular = getPeorValoracionTitular(esc);
 
         // Filtrar candidatos: no del mismo equipo, con estadísticas, mejor que el peor titular
+        // y que se lo puedan permitir (usando hasta el 70% del presupuesto actual)
+        BigDecimal limiteGasto = presupuesto.multiply(BigDecimal.valueOf(0.7));
+
         List<Piloto> candidatos = todosPilotos.stream()
                 .filter(p -> p.getEscuderia() != null && !p.getEscuderia().getId().equals(esc.getId()))
                 .filter(p -> p.getEstadistica() != null)
                 .filter(p -> p.getEstadistica().getValoracion() > peorTitular)
-                .filter(p -> p.getValor() != null && p.getValor().compareTo(presupuesto) <= 0)
+                .filter(p -> p.getValor() != null && p.getValor().compareTo(limiteGasto) <= 0)
                 .collect(Collectors.toList());
 
         if (candidatos.isEmpty()) return null;
@@ -305,7 +314,7 @@ public class IAService {
         double mejorPuntuacion = -1;
 
         for (Piloto p : candidatos) {
-            double puntuacion = calcularPuntuacionFichaje(p, presupuesto);
+            double puntuacion = calcularPuntuacionFichaje(p);
             if (puntuacion > mejorPuntuacion) {
                 mejorPuntuacion = puntuacion;
                 mejorCandidato = p;
@@ -331,20 +340,17 @@ public class IAService {
         return IADecision.fichar(esc.getId(), mejorCandidato.getId(), oferta, esDelUsuario);
     }
 
-    private double calcularPuntuacionFichaje(Piloto p, BigDecimal presupuesto) {
+    private double calcularPuntuacionFichaje(Piloto p) {
         int valoracion = p.getEstadistica().getValoracion();
         int edad = p.getEdad() != null ? p.getEdad() : 25;
-        double valor = p.getValor() != null ? p.getValor().doubleValue() : 10.0;
-        double pres = presupuesto.doubleValue();
 
-        // Valoración (0-99 → 0-1) × peso 0.4
-        double scoreValoracion = (valoracion / 99.0) * 0.4;
-        // Juventud (menor edad = mejor) × peso 0.3
-        double scoreJuventud = Math.max(0, (35 - edad) / 20.0) * 0.3;
-        // Asequibilidad (menor ratio valor/presupuesto = mejor) × peso 0.3
-        double scorePrecio = Math.max(0, 1.0 - (valor / pres)) * 0.3;
+        // La valoración es el factor principal (80%)
+        double scoreValoracion = (valoracion / 99.0) * 0.8;
+        
+        // La juventud es un factor secundario (20%) que actúa como desempate/potencial
+        double scoreJuventud = Math.max(0, (40 - edad) / 25.0) * 0.2;
 
-        return scoreValoracion + scoreJuventud + scorePrecio;
+        return scoreValoracion + scoreJuventud;
     }
 
     private int getPeorValoracionTitular(Escuderia esc) {
