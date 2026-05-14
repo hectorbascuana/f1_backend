@@ -1,0 +1,2 @@
+-- Archivo vacío para evitar inserciones automáticas de Hibernate.
+-- La carga de datos ahora se gestiona a través del endpoint /api/partida/nueva usando initial_data.json.

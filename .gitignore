@@ -1,24 +1,84 @@
-# Compiled class file
-*.class
+# Build output
+/target/
 
-# Log file
+# Maven wrapper
+/.mvn/wrapper/maven-wrapper.jar
+!/.mvn/wrapper/maven-wrapper.properties
+
+# IntelliJ IDEA
+/.idea/
+*.iws
+*.iml
+*.ipr
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+.factorypath
+
+# NetBeans
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+.netbeans_*/
+
+# STS
+.springBeans
+
+# Logs
 *.log
 
-# BlueJ files
-*.ctxt
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon\r
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# Java artifacts
+*.class
 *.jar
 *.war
-*.nar
 *.ear
+*.nar
 *.zip
 *.tar.gz
 *.rar
+*.jks
+*.keystore
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Generated source directories
+**/generated-sources/
+**/generated-test-sources/
+
+# Spring Boot DevTools
+spring-boot-devtools-*.jar
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Maven logs
+.mvn/logs/
+
+# Test reports
+/surefire-reports/
+/failsafe-reports/
+
+# Docker override (optional)
+docker-compose.override.yml
+
+# JVM crash logs
 hs_err_pid*
 replay_pid*
