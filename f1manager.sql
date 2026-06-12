@@ -25,7 +25,7 @@ CREATE TABLE partida (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     id_escuderia_seleccionada INT NULL, -- Se asignará cuando el jugador elija
-    id_proximo_circuito INT NULL,
+    id_proximo_circuito INT DEFAULT 1,  -- Primera vez que me ha creado una partida con proximoCircuito = null. Si no encuenttra el circuto 1 se quedará el valor por defecto
     anio INT DEFAULT 2026,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_proximo_circuito) REFERENCES circuito (id) ON DELETE SET NULL

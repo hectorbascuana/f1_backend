@@ -118,7 +118,7 @@ public class PartidaService {
         Partida partida = new Partida();
         partida.setNombre(nombre);
         // Default circuit
-        circuitoRepository.findById(1).ifPresent(c -> partida.setProximoCircuito(c));
+
         Partida partidaGuardada = partidaRepository.save(partida);
 
         // Load JSON with explicit UTF-8 encoding
