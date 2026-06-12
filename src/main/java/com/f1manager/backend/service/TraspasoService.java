@@ -174,6 +174,12 @@ public class TraspasoService {
         }
 
         // Transferencia de dinero
+
+
+        /* Por este método pasan las funciones de aceptar cualquier traspaso. El usuario lo ejecuta directamente desde el controller de acetpat traspaso (TraspasoController linea 80),
+        *  La ia lo reutiliza si decide que la mejor opción es vender al jugador (TraspasoService linea 360)
+        *
+        * Se calcula cuanto dinero le restaría a la escudería que quiere comprar a ese piloto, en caso de que ese resultado sea menor a 5.000.000 se lanza automáticamente la excepcióon y corta la ejecución, antes de guardar el traspaso */
         double presupuestoDestino = destino.getPresupuesto().doubleValue();
         if (presupuestoDestino < 5_000_000.0 ){
             throw new RuntimeException("Presupuesto de reserva FIA insuficiente");
