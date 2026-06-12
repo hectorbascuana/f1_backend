@@ -119,6 +119,9 @@ public class PartidaService {
         partida.setNombre(nombre);
         // Default circuit
         circuitoRepository.findById(1).ifPresent(c -> partida.setProximoCircuito(c));
+        if (partida.getProximoCircuito() == null) {            throw new RuntimeException("Proximo circuito null");
+        }
+        // Devido a un error que no se por que sucede, al iniciar el backend no se ejecuta el sql completo (no inserta circuitos estando en el mismo archivo sql). Para en la base de datos esté todo lo necesario, hay que insertar los valores de circuitos por separado
         Partida partidaGuardada = partidaRepository.save(partida);
 
         // Load JSON with explicit UTF-8 encoding
@@ -293,7 +296,7 @@ public class PartidaService {
             p.setProximoCircuito(
                     circuitoRepository.findById(1).orElseThrow(() -> new RuntimeException("Circuito 1 no encontrado")));
             p.setAnio(anioActual + 1);
-            
+
             // Al cambiar de año, actualizamos la valoración inicial de todos los pilotos de la partida
             List<Piloto> todosLosPilotos = pilotoRepository.findByPartidaId(id);
             for (Piloto pil : todosLosPilotos) {
@@ -394,6 +397,7 @@ public class PartidaService {
             p.setValor(BigDecimal.valueOf(1 + random.nextInt(5))); // 1-5 million
             p.setEscuderia(escuderia);
             p.setEstadistica(est);
+            p.setIsRokie(true);
 
             pilotoRepository.save(p);
         }

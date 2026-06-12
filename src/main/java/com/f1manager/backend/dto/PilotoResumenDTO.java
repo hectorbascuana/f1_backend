@@ -18,4 +18,7 @@ public class PilotoResumenDTO {
     
     @com.fasterxml.jackson.annotation.JsonProperty("ha_corrido")
     private Boolean haCorrido;
+
+    private Boolean isRokie; // Añadido el campo requerido
+
 }

@@ -163,6 +163,8 @@ public class TraspasoService {
             throw new RuntimeException("El piloto ya no pertenece a la escudería de origen");
         }
 
+
+
         if (origen != null && origen.getPilotos().size() <= 2) {
             throw new RuntimeException("La escudería de origen no puede quedarse con menos de 2 pilotos");
         }
@@ -172,7 +174,18 @@ public class TraspasoService {
         }
 
         // Transferencia de dinero
-        destino.setPresupuesto(destino.getPresupuesto().subtract(traspaso.getPrecio()));
+
+
+        /* Por este método pasan las funciones de aceptar cualquier traspaso. El usuario lo ejecuta directamente desde el controller de acetpat traspaso (TraspasoController linea 80),
+        *  La ia lo reutiliza si decide que la mejor opción es vender al jugador (TraspasoService linea 360)
+        *
+        * Se calcula cuanto dinero le restaría a la escudería que quiere comprar a ese piloto, en caso de que ese resultado sea menor a 5.000.000 se lanza automáticamente la excepcióon y corta la ejecución, antes de guardar el traspaso */
+        double presupuestoDestino = destino.getPresupuesto().doubleValue();
+        if (presupuestoDestino < 5_000_000.0 ){
+            throw new RuntimeException("Presupuesto de reserva FIA insuficiente");
+        }
+        destino.setPresupuesto(BigDecimal.valueOf(presupuestoDestino));
+
         if (origen != null) {
             origen.setPresupuesto(origen.getPresupuesto().add(traspaso.getPrecio()));
         }
@@ -396,7 +409,7 @@ public class TraspasoService {
 
         return dto;
     }
-
+    // Añadido campo isRokie
     private PilotoMinDTO toPilotoMinDTO(Piloto piloto) {
         PilotoMinDTO dto = new PilotoMinDTO();
         dto.setId(piloto.getId());
@@ -404,6 +417,7 @@ public class TraspasoService {
         dto.setPais(piloto.getPais());
         dto.setImagen(piloto.getImagen());
         dto.setEdad(piloto.getEdad());
+        dto.setIsRokie(piloto.getIsRokie());
         return dto;
     }
 

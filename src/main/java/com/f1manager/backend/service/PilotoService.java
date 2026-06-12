@@ -63,6 +63,9 @@ public class PilotoService {
         pilotoRepository.deleteById(id);
     }
 
+
+    // Añadido campo isRokie
+
     public PilotoResumenDTO toPilotoResumenDTO(Piloto piloto) {
         PilotoResumenDTO dto = new PilotoResumenDTO();
         dto.setId(piloto.getId());
@@ -89,6 +92,7 @@ public class PilotoService {
             dto.setEstadisticas(toEstadisticaDTO(piloto.getEstadistica()));
         }
         dto.setHaCorrido(piloto.getHaCorrido());
+        dto.setIsRokie(piloto.getIsRokie());
         return dto;
     }
 
@@ -118,6 +122,7 @@ public class PilotoService {
         dto.setImagen(escuderia.getImagen());
         return dto;
     }
+    // Añadido campo isRokie
 
     public PilotoDetalleDTO toPilotoDetalleDTO(Piloto piloto) {
         PilotoDetalleDTO dto = new PilotoDetalleDTO();
@@ -129,6 +134,7 @@ public class PilotoService {
         dto.setPuntos(piloto.getPuntos());
         dto.setValor(piloto.getValor() != null ? piloto.getValor().toPlainString() : null);
         dto.setHaCorrido(piloto.getHaCorrido());
+        dto.setIsRokie(piloto.getIsRokie());
 
         return dto;
     }
