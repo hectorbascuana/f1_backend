@@ -163,6 +163,8 @@ public class TraspasoService {
             throw new RuntimeException("El piloto ya no pertenece a la escudería de origen");
         }
 
+
+
         if (origen != null && origen.getPilotos().size() <= 2) {
             throw new RuntimeException("La escudería de origen no puede quedarse con menos de 2 pilotos");
         }
@@ -172,7 +174,12 @@ public class TraspasoService {
         }
 
         // Transferencia de dinero
-        destino.setPresupuesto(destino.getPresupuesto().subtract(traspaso.getPrecio()));
+        double presupuestoDestino = destino.getPresupuesto().doubleValue();
+        if (presupuestoDestino < 5_000_000.0 ){
+            throw new RuntimeException("Presupuesto de reserva FIA insuficiente");
+        }
+        destino.setPresupuesto(BigDecimal.valueOf(presupuestoDestino));
+
         if (origen != null) {
             origen.setPresupuesto(origen.getPresupuesto().add(traspaso.getPrecio()));
         }
