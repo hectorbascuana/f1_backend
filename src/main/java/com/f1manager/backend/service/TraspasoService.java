@@ -409,7 +409,7 @@ public class TraspasoService {
 
         return dto;
     }
-
+    // Añadido campo isRokie
     private PilotoMinDTO toPilotoMinDTO(Piloto piloto) {
         PilotoMinDTO dto = new PilotoMinDTO();
         dto.setId(piloto.getId());
@@ -417,6 +417,7 @@ public class TraspasoService {
         dto.setPais(piloto.getPais());
         dto.setImagen(piloto.getImagen());
         dto.setEdad(piloto.getEdad());
+        dto.setIsRokie(piloto.getIsRokie());
         return dto;
     }
 

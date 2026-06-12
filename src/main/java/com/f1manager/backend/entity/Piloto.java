@@ -64,6 +64,10 @@ public class Piloto {
     @Column(name = "ha_corrido", nullable = false)
     private Boolean haCorrido = false;
 
+    //Se añade el nuevo campo a la entity
+    @Column(name = "is_rokie", nullable = false)
+    private Boolean isRokie = false;
+
     @OneToMany(mappedBy = "piloto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PilotoCircuito> pilotoCircuitos;
 }

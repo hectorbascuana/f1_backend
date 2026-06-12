@@ -64,6 +64,8 @@ CREATE TABLE escuderia (
 ) ENGINE = InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 5. Tabla de Piloto
+
+--Añadido campo boleano de is rokie. Por defecto será false para que no sea necesario modificar el archivo initial_data.json
 CREATE TABLE piloto (
     id INT AUTO_INCREMENT PRIMARY KEY,
     partida_id INT NOT NULL,
@@ -76,6 +78,7 @@ CREATE TABLE piloto (
     valor DECIMAL(15, 2),
     estadistica_id INT,
     ha_corrido BOOLEAN DEFAULT FALSE,
+    is_rokie BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (partida_id) REFERENCES partida (id) ON DELETE CASCADE,
     FOREIGN KEY (escuderia_id) REFERENCES escuderia (id) ON DELETE SET NULL,
     FOREIGN KEY (estadistica_id) REFERENCES estadistica (id) ON DELETE CASCADE

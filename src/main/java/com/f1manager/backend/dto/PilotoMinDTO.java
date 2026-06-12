@@ -9,4 +9,6 @@ public class PilotoMinDTO {
     private String pais;
     private String imagen;
     private Integer edad;
+    private Boolean isRokie; // Añadido el campo requerido
+
 }

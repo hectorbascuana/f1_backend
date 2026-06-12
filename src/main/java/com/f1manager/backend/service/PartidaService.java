@@ -395,6 +395,9 @@ public class PartidaService {
             p.setEscuderia(escuderia);
             p.setEstadistica(est);
 
+            // Se añade el nuevo campo de isRokie como true para cada piloto que se genere nuevo
+            p.setIsRokie(true);
+
             pilotoRepository.save(p);
         }
     }
